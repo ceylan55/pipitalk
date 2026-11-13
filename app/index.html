@@ -128,11 +128,16 @@
     }
     .exercise-prompt { font-size: 21px; font-weight: 800; margin-bottom: 16px; line-height: 1.3; }
 
+    .speak-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
     .speak-btn {
-      display: inline-flex; align-items: center; gap: 10px; background: #EDE9FE; color: var(--primary);
-      border: 2px solid var(--primary-light); padding: 12px 18px; border-radius: 16px;
-      font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 20px; align-self: flex-start;
+      display: inline-flex; align-items: center; gap: 8px; background: #EDE9FE; color: var(--primary);
+      border: 2px solid var(--primary-light); padding: 11px 16px; border-radius: 16px;
+      font-size: 15px; font-weight: 800; cursor: pointer;
       box-shadow: 0 4px 0 var(--primary-light);
+    }
+    .speak-btn.slow {
+      background: #FEF3C7; color: #B45309; border-color: #F59E0B;
+      box-shadow: 0 4px 0 #F59E0B;
     }
     .speak-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--primary-light); }
 
@@ -614,7 +619,22 @@
         if ('speechSynthesis' in window) {
           window.speechSynthesis.cancel();
           const u = new SpeechSynthesisUtterance(text);
-          u.lang = 'en-US'; u.rate = 0.9;
+          u.lang = 'en-US'; u.rate = 0.88;
+          window.speechSynthesis.speak(u);
+        }
+      } catch (e) {}
+    }
+
+    function speakSlow(text) {
+      try {
+        if (window.PipiBridge && window.PipiBridge.speakSlow) {
+          window.PipiBridge.speakSlow(text);
+          return;
+        }
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'en-US'; u.rate = 0.45;
           window.speechSynthesis.speak(u);
         }
       } catch (e) {}
@@ -732,9 +752,15 @@
       checkBtn.disabled = true;
 
       const body = document.getElementById('lessonBody');
+      const safeAudio = q.audio.replace(/'/g, "\\'");
+      const hideAnswerLabel = (q.type === 'listen' || q.type === 'build' || q.tag === 'Çeviri');
+      const listenLabel = hideAnswerLabel ? '🔊 Dinle' : `🔊 Dinle: "${q.audio}"`;
       let html = `<span class="exercise-type-tag">${q.tag}</span>`;
       html += `<div class="exercise-prompt">${q.prompt}</div>`;
-      html += `<button class="speak-btn" onclick="speakWord('${q.audio.replace(/'/g, "\\'")}')">🔊 Dinle: "${q.type === 'listen' ? 'Sesi Çal' : q.audio}"</button>`;
+      html += `<div class="speak-row">
+        <button class="speak-btn" onclick="speakWord('${safeAudio}')">${listenLabel}</button>
+        <button class="speak-btn slow" onclick="speakSlow('${safeAudio}')">🐢 Yavaş Dinle</button>
+      </div>`;
 
       if (q.type === 'choice' || q.type === 'listen') {
         html += `<div class="word-cards">`;
@@ -781,7 +807,9 @@
       `;
 
       body.innerHTML = html;
-      setTimeout(() => speakWord(q.audio), 250);
+      if (q.type === 'listen' || q.tag === 'Kelime') {
+        setTimeout(() => speakWord(q.audio), 250);
+      }
     }
 
     function pickOption(el, idx) {
@@ -880,7 +908,14 @@
         if (!state.unitLevels) state.unitLevels = {};
         state.unitLevels[currentUnit.id] = (state.unitLevels[currentUnit.id] || 1) + 1;
         const nextU = UNITS.find(u => u.id === currentUnit.id + 1);
-        document.getElementById('nextUnitBtn').style.display = nextU ? 'block' : 'none';
+        const nextBtn = document.getElementById('nextUnitBtn');
+        nextBtn.style.display = 'block';
+        if (nextU) {
+          nextBtn.innerText = 'SONRAKİ ÜNİTEYE GEÇ →';
+        } else {
+          state.prestige = (state.prestige || 1) + 1;
+          nextBtn.innerText = `🚀 YENİ TURU BAŞLAT (TUR ${state.prestige}) →`;
+        }
         document.getElementById('completeTitle').innerText = currentUnit.isBoss ? '🏆 Bölüm Finali Geçildi!' : '🎉 Ünite Tamamlandı!';
         saveState();
         playChime(true);
@@ -893,7 +928,10 @@
       if (nextU) {
         startLesson(nextId);
       } else {
-        finishLesson();
+        // 50. ünite bitince yeni zorluk turu (Tur 2, Tur 3...) olarak başa döner ve tüm soruları yeniden üretir
+        state.completedUnits = [];
+        saveState();
+        startLesson(1);
       }
     }
 
@@ -939,7 +977,8 @@
       const box = document.getElementById('chatBox');
       const div = document.createElement('div');
       div.className = 'msg pipi';
-      div.innerHTML = `<div><strong>Pipi:</strong> ${en}</div><div class="msg-tr">${tr}</div><div class="msg-speak" onclick="speakWord('${en.replace(/'/g, "\\'")}')">🔊 Dinle</div>`;
+      const safeEn = en.replace(/'/g, "\\'");
+      div.innerHTML = `<div><strong>Pipi:</strong> ${en}</div><div class="msg-tr">${tr}</div><div style="display:flex;gap:8px;margin-top:6px;"><div class="msg-speak" onclick="speakWord('${safeEn}')">🔊 Dinle</div><div class="msg-speak" style="color:#B45309;background:#FEF3C7;" onclick="speakSlow('${safeEn}')">🐢 Yavaş</div></div>`;
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
       speakWord(en);
