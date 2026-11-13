@@ -204,7 +204,15 @@
     .chat-input:focus { border-color: var(--primary); }
     .send-btn {
       background: var(--primary); color: #fff; border: none; border-radius: 14px;
-      padding: 0 18px; font-weight: 800; cursor: pointer; font-size: 15px;
+      padding: 0 16px; font-weight: 800; cursor: pointer; font-size: 15px;
+    }
+    .mic-btn {
+      background: var(--accent); color: #fff; border: none; border-radius: 14px;
+      padding: 0 14px; font-weight: 800; cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .mic-btn.listening {
+      background: var(--danger); transform: scale(1.06);
     }
 
     /* Profile Tab */
@@ -295,7 +303,8 @@
       <div class="quick-replies" id="quickReplies"></div>
 
       <div class="chat-input-row">
-        <input type="text" id="chatInput" class="chat-input" placeholder="İngilizce bir şey yaz... (örn: Hello Pipi)">
+        <button class="mic-btn" id="micBtn" onclick="startMic()" title="Sesli Konuş">🎤</button>
+        <input type="text" id="chatInput" class="chat-input" placeholder="İngilizce yaz veya mikrofona bas...">
         <button class="send-btn" onclick="sendChat()">Gönder</button>
       </div>
     </div>
@@ -806,6 +815,58 @@
       generateAiReply(val);
     }
 
+    window.onMicState = function(isListening) {
+      const btn = document.getElementById('micBtn');
+      const inp = document.getElementById('chatInput');
+      if (isListening) {
+        btn.classList.add('listening');
+        btn.innerText = '🔴';
+        inp.placeholder = 'Dinliyorum... İngilizce konuş!';
+      } else {
+        btn.classList.remove('listening');
+        btn.innerText = '🎤';
+        inp.placeholder = 'İngilizce yaz veya mikrofona bas...';
+      }
+    };
+
+    window.onMicResult = function(text) {
+      if (!text) return;
+      addUserMessage('🎤 ' + text);
+      generateAiReply(text);
+    };
+
+    window.onMicError = function(err) {
+      const inp = document.getElementById('chatInput');
+      inp.placeholder = err || 'Ses algılanamadı, tekrar dene...';
+    };
+
+    function startMic() {
+      if (window.PipiBridge && window.PipiBridge.startListening) {
+        window.PipiBridge.startListening();
+        return;
+      }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        alert('Bu cihazda tarayıcı ses tanıma desteklenmiyor.');
+        return;
+      }
+      const rec = new SR();
+      rec.lang = 'en-US';
+      rec.interimResults = false;
+      window.onMicState(true);
+      rec.onresult = (e) => {
+        window.onMicState(false);
+        const text = e.results[0][0].transcript;
+        window.onMicResult(text);
+      };
+      rec.onerror = () => {
+        window.onMicState(false);
+        window.onMicError('Ses algılanamadı.');
+      };
+      rec.onend = () => window.onMicState(false);
+      rec.start();
+    }
+
     function pickRandom(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
     }
@@ -872,13 +933,33 @@
           { en: "I am super happy today! What is your name?", tr: "Bugün süper mutluyum! Senin adın ne?", chips: ["My name is Ali", "My name is Zehra"] }
         ]);
       }
-      // 5. İsim tanıtma
-      else if (low.includes("name") || /\b(i am|i'm)\b/.test(low) && !low.includes("happy") && !low.includes("sad") && !low.includes("good") && !low.includes("great") && !low.includes("tired")) {
-        reply = pickRandom([
-          { en: "Nice to meet you! That is a lovely name. +5 XP!", tr: "Tanıştığımıza memnun oldum! Çok güzel bir isim. +5 XP!", chips: ["Thank you!", "How are you?", "I like blue"] },
-          { en: "Welcome! I am Pipi the Owl. What animal do you like?", tr: "Hoş geldin! Ben Baykuş Pipi. Hangi hayvanı seversin?", chips: ["I like lions", "I like dogs", "I like birds"] }
-        ]);
-        state.xp += 5; saveState();
+      // 5. İsim tanıtma (akıllı isim doğrulama ile)
+      else if (/\b(my name is|i am|i'm|name is)\b/.test(low) && !/\b(happy|sad|good|great|tired|fine|okay|here|ready)\b/.test(low)) {
+        const match = low.match(/(?:my name is|name is|i am|i'm)\s+([a-zçğıöşü0-9]+)/i);
+        const candidate = match ? match[1].toLowerCase() : "";
+        const animals = new Set(["monkey","donkey","cat","dog","owl","bird","lion","fish","cow","pig","sheep","goat","horse","chicken","frog","bear","tiger","snake","elephant","mouse","rabbit","duck","maymun","eşek","esek","kedi","köpek","kopek","inek","keçi","at","tavuk","aslan"]);
+        const objectsColors = new Set(["apple","banana","table","chair","car","phone","pizza","water","milk","bread","book","pen","red","blue","green","yellow","purple","orange","pink","black","white","one","two","three","four","five","six","seven","eight","nine","ten","elma","masa","araba"]);
+        const silly = new Set(["stupid","idiot","bad","poop","fart","crazy","dumb","salak","aptal","mal","deli"]);
+
+        if (!candidate) {
+          reply = { en: "Hoot? You forgot to say your name! Try: 'My name is Ali'.", tr: "Hu? Adını yazmayı unuttun! Örnek: 'My name is Ali'.", chips: ["My name is Ali", "My name is Zehra"] };
+        } else if (animals.has(candidate)) {
+          reply = pickRandom([
+            { en: `Haha! '${candidate}' is an animal, not a real name! Tell me your real name!`, tr: `Haha! '${candidate}' bir hayvan, gerçek bir isim değil! Bana gerçek adını söyler misin?`, chips: ["My name is Ali", "My name is Ömer", "I am Zehra"] },
+            { en: `Wait a second! Are you really a ${candidate}? That's funny! What is your actual name?`, tr: `Bir dakika! Gerçekten bir ${candidate} misin? Çok komik! Gerçek adın ne?`, chips: ["My name is Gökçen", "My name is Ali"] }
+          ]);
+        } else if (objectsColors.has(candidate) || /^[0-9]+$/.test(candidate)) {
+          reply = { en: `Whoa! '${candidate}' is not a person's name! Try a real name like 'Ali' or 'Zehra'.`, tr: `Vay canına! '${candidate}' bir insan ismi değil! 'Ali' veya 'Zehra' gibi gerçek bir isim dene.`, chips: ["My name is Ali", "My name is Zehra"] };
+        } else if (silly.has(candidate)) {
+          reply = { en: "Hey, be nice! Let's use a kind, real name instead.", tr: "Hey, nazik olalım! Bunun yerine güzel, gerçek bir isim kullanalım.", chips: ["My name is Ali", "I am happy"] };
+        } else {
+          const capName = candidate.charAt(0).toUpperCase() + candidate.slice(1);
+          reply = pickRandom([
+            { en: `Nice to meet you, ${capName}! That is a lovely name. +5 XP!`, tr: `Tanıştığımıza memnun oldum, ${capName}! Çok güzel bir isim. +5 XP!`, chips: ["Thank you!", "How are you?", "I like blue"] },
+            { en: `Welcome, ${capName}! I am Pipi the Owl. What animal do you like?`, tr: `Hoş geldin, ${capName}! Ben Baykuş Pipi. Hangi hayvanı seversin?`, chips: ["I like lions", "I like dogs", "I like birds"] }
+          ]);
+          state.xp += 5; saveState();
+        }
       }
       // 6. Duygular
       else if (/\b(happy|great|good|fine|amazing|super|sad|tired)\b/.test(low)) {
