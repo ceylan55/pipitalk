@@ -370,6 +370,11 @@
         </div>
       </div>
 
+      <div class="lang-switch" style="margin-bottom: 14px;">
+        <div class="lang-pill active" id="ageKidsBtn" onclick="setAgeMode('kids7')">🐣 7 Yaş (Temel)</div>
+        <div class="lang-pill" id="ageTeenBtn" onclick="setAgeMode('teen13')">🚀 13-14 Yaş (İleri)</div>
+      </div>
+
       <div class="path-container" id="unitPath"></div>
     </div>
 
@@ -565,15 +570,16 @@
     }
 
     function buildDynamicLesson(unit) {
+      const isTeen = state.ageMode === 'teen13';
       const qs = [];
       const vPool = shuffleArr(unit.vocab);
       const allOtherVocab = UNITS.flatMap(u => u.vocab).filter(v => !unit.vocab.some(uv => uv.en === v.en));
 
-      const countVocab = Math.min(3, vPool.length);
+      const countVocab = Math.min(isTeen ? 4 : 3, vPool.length);
       for (let i = 0; i < countVocab; i++) {
         const target = vPool[i];
         const distractors = shuffleArr(unit.vocab.filter(x => x.en !== target.en).concat(allOtherVocab)).slice(0, 3);
-        const mode = Math.floor(Math.random() * 3);
+        const mode = isTeen ? (i % 2 === 0 ? 2 : 1) : Math.floor(Math.random() * 3);
         if (mode === 0) {
           qs.push({
             type: "choice", tag: "Kelime", audio: target.en,
@@ -582,25 +588,31 @@
           });
         } else if (mode === 1) {
           qs.push({
-            type: "listen", tag: "Dinleme", audio: target.en,
+            type: "listen", tag: isTeen ? "Zor Dinleme" : "Dinleme", audio: target.en,
             prompt: "Sesi dinle ve doğru anlamı seç:",
             options: shuffleArr([{ text: target.tr, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.tr, emoji: d.em, correct: false }))))
           });
         } else {
           qs.push({
-            type: "choice", tag: "Çeviri", audio: target.en,
+            type: "choice", tag: isTeen ? "İleri Çeviri" : "Çeviri", audio: target.en,
             prompt: `"${target.tr}" kelimesinin İngilizcesi hangisi?`,
             options: shuffleArr([{ text: target.en, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.en, emoji: d.em, correct: false }))))
           });
         }
       }
 
-      const sPool = shuffleArr(unit.sentences).slice(0, 2);
+      const sPool = shuffleArr(unit.sentences).slice(0, isTeen ? 4 : 2);
       sPool.forEach(s => {
+        const baseWords = s.en.split(" ");
+        let words = baseWords;
+        if (isTeen) {
+          const decoys = shuffleArr(allOtherVocab).slice(0, 2).map(d => d.en.split(" ")[0]);
+          words = baseWords.concat(decoys);
+        }
         qs.push({
-          type: "build", tag: "Cümle Kur", audio: s.en,
-          prompt: `"${s.tr}" cümlesini kur:`,
-          words: shuffleArr(s.en.split(" ")),
+          type: "build", tag: isTeen ? "Zorlu Cümle Kur" : "Cümle Kur", audio: s.en,
+          prompt: isTeen ? `"${s.tr}" cümlesini kur (fazla kelimelere dikkat!):` : `"${s.tr}" cümlesini kur:`,
+          words: shuffleArr(words),
           answer: s.en
         });
       });
@@ -609,8 +621,32 @@
     }
     // --- STATE ---
     let state = JSON.parse(localStorage.getItem('pipitalk_state') || 'null') || {
-      xp: 0, gems: 120, hearts: 5, streak: 3, completedUnits: []
+      xp: 0, gems: 120, hearts: 5, streak: 3, completedUnits: [], ageMode: 'kids7'
     };
+    if (!state.ageMode) state.ageMode = 'kids7';
+
+    function setAgeMode(mode) {
+      state.ageMode = mode;
+      saveState();
+      updateAgeUI();
+      renderProfile();
+    }
+
+    function updateAgeUI() {
+      const isTeen = state.ageMode === 'teen13';
+      const kBtn = document.getElementById('ageKidsBtn');
+      const tBtn = document.getElementById('ageTeenBtn');
+      if (kBtn && tBtn) {
+        kBtn.classList.toggle('active', !isTeen);
+        tBtn.classList.toggle('active', isTeen);
+      }
+      const greet = document.getElementById('pipiGreeting');
+      if (greet) {
+        greet.innerHTML = isTeen
+          ? 'Merhaba! <strong>13-14 Yaş İleri Mod</strong> aktif: 8 soruluk zorlu testler ve şaşırtmacalı cümleler seni bekliyor! 🚀🦜'
+          : 'Merhaba! Ben <strong>Pipi</strong>. <strong>7 Yaş Temel Mod</strong> ile eğlenceli kelimeler ve 50 ünitelik macera seni bekliyor! 🐣🦜';
+      }
+    }
 
     function saveState() {
       localStorage.setItem('pipitalk_state', JSON.stringify(state));
@@ -650,7 +686,7 @@
         if ('speechSynthesis' in window) {
           window.speechSynthesis.cancel();
           const u = new SpeechSynthesisUtterance(text);
-          u.lang = 'en-US'; u.rate = 0.88;
+          u.lang = 'en-US'; u.rate = 0.88; u.pitch = 1.32;
           window.speechSynthesis.speak(u);
         }
       } catch (e) {}
@@ -665,7 +701,7 @@
         if ('speechSynthesis' in window) {
           window.speechSynthesis.cancel();
           const u = new SpeechSynthesisUtterance(text);
-          u.lang = 'en-US'; u.rate = 0.45;
+          u.lang = 'en-US'; u.rate = 0.45; u.pitch = 1.20;
           window.speechSynthesis.speak(u);
         }
       } catch (e) {}
@@ -1310,11 +1346,18 @@
       }
       // 11. Diğer geçerli ama listede olmayan İngilizce cümleler
       else {
-        reply = pickRandom([
-          { en: "Interesting! Can you tell me more using simple English words?", tr: "İlginç! Basit İngilizce kelimelerle biraz daha anlatır mısın?", chips: ["I like apples", "I am happy", "Blue"] },
-          { en: "Nice try! Let's practice colors or animals together.", tr: "Güzel deneme! Hadi birlikte renkler veya hayvanlar çalışalım.", chips: ["I like red", "Cat", "One, two, three"] },
-          { en: "Good effort! Remember, you can ask me 'How are you?' anytime.", tr: "Güzel çaba! Bana her zaman 'How are you?' diye sorabilirsin.", chips: ["How are you?", "What is your name?"] }
-        ]);
+        if (state.ageMode === 'teen13') {
+          reply = pickRandom([
+            { en: "Great sentence! Can you explain WHY using 'because'? For example: 'I like English because it is fun.'", tr: "Harika cümle! 'because' (çünkü) kullanarak nedenini açıklar mısın?", chips: ["I like music because it is fun", "Yesterday I went to school", "What do you think?"] },
+            { en: "Nice! At your level, try using past tense or future tense like 'I will study tomorrow.'", tr: "Güzel! Senin seviyende gelecek veya geçmiş zaman dene: 'Yarın çalışacağım.'", chips: ["I will study tomorrow", "I went to the park", "How was your day?"] }
+          ]);
+        } else {
+          reply = pickRandom([
+            { en: "Interesting! Can you tell me more using simple English words?", tr: "İlginç! Basit İngilizce kelimelerle biraz daha anlatır mısın?", chips: ["I like apples", "I am happy", "Blue"] },
+            { en: "Nice try! Let's practice colors or animals together.", tr: "Güzel deneme! Hadi birlikte renkler veya hayvanlar çalışalım.", chips: ["I like red", "Cat", "One, two, three"] },
+            { en: "Good effort! Remember, you can ask me 'How are you?' anytime.", tr: "Güzel çaba! Bana her zaman 'How are you?' diye sorabilirsin.", chips: ["How are you?", "What is your name?"] }
+          ]);
+        }
       }
 
       setTimeout(() => {
@@ -1325,6 +1368,10 @@
 
     // --- PROFILE & TABS ---
     function renderProfile() {
+      const nameEl = document.querySelector('.profile-name');
+      if (nameEl) {
+        nameEl.innerText = state.ageMode === 'teen13' ? 'Genç Bilgin (13-14 Yaş)' : 'Küçük Kaşif (7 Yaş)';
+      }
       document.getElementById('completedCount').innerText = state.completedUnits.length;
       document.getElementById('profileRank').innerText =
         state.xp >= 100 ? "Seviye: Bilge Papağan (A1)" : (state.xp >= 30 ? "Seviye: Hızlı Öğrenci (A0+)" : "Seviye: Başlangıç (A0)");
@@ -1359,6 +1406,7 @@
 
     // Init
     saveState();
+    updateAgeUI();
     renderPath();
   </script>
 </body>
