@@ -820,7 +820,7 @@
 
       const body = document.getElementById('lessonBody');
       const safeAudio = q.audio.replace(/'/g, "\\'");
-      const hideAnswerLabel = (q.type === 'listen' || q.type === 'build' || q.tag === 'Çeviri');
+      const hideAnswerLabel = (q.type === 'listen' || q.type === 'build' || (q.tag && q.tag.includes('Çeviri')));
       const listenLabel = hideAnswerLabel ? '🔊 Dinle' : `🔊 Dinle: "${q.audio}"`;
       let html = `<span class="exercise-type-tag">${q.tag}</span>`;
       html += `<div class="exercise-prompt">${q.prompt}</div>`;
@@ -896,7 +896,9 @@
       `;
 
       body.innerHTML = html;
-      setTimeout(() => speakWord(q.audio), 250);
+      if (!hideAnswerLabel || q.type === 'listen') {
+        setTimeout(() => speakWord(q.audio), 250);
+      }
     }
 
     function pickOption(el, idx) {
