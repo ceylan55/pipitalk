@@ -157,6 +157,27 @@
     }
     .word-chip.used { opacity: 0.3; pointer-events: none; }
 
+    /* Animated Pipi Stage inside Lesson */
+    .pipi-stage {
+      margin-top: auto; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 190px; position: relative;
+    }
+    .pipi-stage-svg { width: 158px; height: 158px; transition: transform 0.2s; animation: pipiIdle 2.4s ease-in-out infinite; filter: drop-shadow(0 6px 10px rgba(124,58,237,0.22)); }
+    .pipi-stage.happy .pipi-stage-svg { animation: pipiJump 0.55s ease-in-out infinite; }
+    .pipi-stage.sad .pipi-stage-svg { animation: pipiShake 0.4s ease-in-out 2; }
+    .pipi-stage-msg {
+      margin-top: 6px; background: #EDE9FE; color: var(--primary-dark); padding: 6px 14px;
+      border-radius: 99px; font-size: 13px; font-weight: 800; text-align: center;
+    }
+    .pipi-stage.happy .pipi-stage-msg { background: #D1FAE5; color: #065F46; }
+    .pipi-stage.sad .pipi-stage-msg { background: #FEE2E2; color: #991B1B; }
+    .pipi-sparkles { position: absolute; top: 4px; font-size: 24px; opacity: 0; pointer-events: none; }
+    .pipi-stage.happy .pipi-sparkles { opacity: 1; animation: popSparkle 0.6s ease-out infinite alternate; }
+    @keyframes pipiIdle { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    @keyframes pipiJump { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-18px) scale(1.08) rotate(-4deg); } }
+    @keyframes pipiShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-7px) rotate(-3deg); } 75% { transform: translateX(7px) rotate(3deg); } }
+    @keyframes popSparkle { 0% { transform: scale(0.85); } 100% { transform: scale(1.18); } }
+
     /* Bottom Action & Feedback Sheet */
     .lesson-footer { margin-top: auto; padding-top: 12px; }
     .btn-action {
@@ -732,6 +753,33 @@
         currentExpectedText = q.answer;
       }
 
+      html += `
+        <div class="pipi-stage" id="pipiStage">
+          <div class="pipi-sparkles">✨🎉⭐🎉✨</div>
+          <svg class="pipi-stage-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="55" r="38" fill="#8B5CF6"/>
+            <circle cx="50" cy="62" r="26" fill="#EDE9FE"/>
+            <g id="pipiEyesNormal">
+              <circle cx="36" cy="45" r="14" fill="#FFFFFF"/>
+              <circle cx="64" cy="45" r="14" fill="#FFFFFF"/>
+              <circle cx="38" cy="45" r="7" fill="#1E1B4B"/>
+              <circle cx="62" cy="45" r="7" fill="#1E1B4B"/>
+              <circle cx="41" cy="42" r="2.5" fill="#FFFFFF"/>
+              <circle cx="65" cy="42" r="2.5" fill="#FFFFFF"/>
+            </g>
+            <g id="pipiEyesHappy" style="display:none;">
+              <path d="M26 47 Q36 35 46 47" stroke="#1E1B4B" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+              <path d="M54 47 Q64 35 74 47" stroke="#1E1B4B" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            </g>
+            <polygon points="50,52 44,60 56,60" fill="#F59E0B"/>
+            <path d="M12 55 Q 6 68 20 78" stroke="#7C3AED" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <path d="M88 55 Q 94 68 80 78" stroke="#7C3AED" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <polygon points="50,14 43,24 57,24" fill="#F59E0B"/>
+          </svg>
+          <div class="pipi-stage-msg" id="pipiStageMsg">Hadi, sen yaparsın! 🦉</div>
+        </div>
+      `;
+
       body.innerHTML = html;
       setTimeout(() => speakWord(q.audio), 250);
     }
@@ -780,6 +828,21 @@
       }
 
       playChime(lastCorrect);
+      const stage = document.getElementById('pipiStage');
+      const stageMsg = document.getElementById('pipiStageMsg');
+      const eyesN = document.getElementById('pipiEyesNormal');
+      const eyesH = document.getElementById('pipiEyesHappy');
+      if (stage) {
+        stage.classList.remove('happy', 'sad');
+        stage.classList.add(lastCorrect ? 'happy' : 'sad');
+        if (lastCorrect) {
+          if (eyesN) eyesN.style.display = 'none';
+          if (eyesH) eyesH.style.display = 'block';
+          if (stageMsg) stageMsg.innerText = 'Yaşasın! Çok iyi bildin! 🎉🦉';
+        } else {
+          if (stageMsg) stageMsg.innerText = 'Sorun değil, bir dahakine! 💪';
+        }
+      }
       const sheet = document.getElementById('feedbackSheet');
       const title = document.getElementById('feedbackTitle');
       const detail = document.getElementById('feedbackDetail');
