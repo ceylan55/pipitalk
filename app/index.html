@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
@@ -50,34 +50,61 @@
     .pipi-avatar { width: 82px; height: 82px; flex-shrink: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
     .pipi-bubble { font-size: 15px; font-weight: 600; line-height: 1.4; }
 
-    /* Path / Levels View */
-    .path-container { display: flex; flex-direction: column; align-items: center; gap: 22px; padding-bottom: 24px; }
+    /* Path / Adventure Map View */
+    .path-container { display: flex; flex-direction: column; align-items: center; gap: 0; padding-bottom: 24px; width: 100%; }
+    .world-section {
+      width: 100%; border-radius: 26px; padding: 16px 12px 28px; margin-bottom: 22px;
+      position: relative; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+    .world-1 { background: linear-gradient(180deg, #DCFCE7 0%, #BAE6FD 50%, #D1FAE5 100%); border: 2px solid #86EFAC; }
+    .world-2 { background: linear-gradient(180deg, #E0F2FE 0%, #99F6E4 50%, #FEF3C7 100%); border: 2px solid #5EEAD4; }
+    .world-3 { background: linear-gradient(180deg, #EDE9FE 0%, #DDD6FE 50%, #FCE7F3 100%); border: 2px solid #C4B5FD; }
     .world-header {
-      width: 100%; background: #EDE9FE; color: var(--primary);
-      padding: 12px 18px; border-radius: 16px; font-weight: 800; font-size: 14px;
+      width: 100%; background: rgba(255,255,255,0.92); color: var(--primary);
+      padding: 12px 16px; border-radius: 16px; font-weight: 900; font-size: 14px;
       text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px; position: relative; z-index: 3; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .map-track { position: relative; display: flex; flex-direction: column; gap: 26px; padding: 10px 0; }
+    .map-svg-bg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+    .map-row {
+      display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; width: 100%;
+    }
+    .map-row.left { justify-content: flex-start; padding-left: 16%; }
+    .map-row.right { justify-content: flex-end; padding-right: 16%; }
+    .map-row.center { justify-content: center; }
+    .scenery-dec {
+      position: absolute; font-size: 30px; pointer-events: none; z-index: 1; opacity: 0.92;
+      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1));
     }
     .unit-wrap { display: flex; flex-direction: column; align-items: center; position: relative; }
     .unit-node {
-      width: 82px; height: 82px; border-radius: 50%; display: flex;
+      width: 80px; height: 80px; border-radius: 50%; display: flex;
       flex-direction: column; align-items: center; justify-content: center;
-      background: #fff; border: 4px solid var(--border); box-shadow: 0 6px 0 var(--border);
-      cursor: pointer; transition: all 0.15s ease;
+      background: #fff; border: 4px solid var(--border); box-shadow: 0 7px 0 var(--border), 0 10px 18px rgba(0,0,0,0.12);
+      cursor: pointer; transition: all 0.15s ease; position: relative;
     }
     .unit-node.active {
-      background: var(--accent); border-color: #D97706; box-shadow: 0 6px 0 var(--accent-dark);
+      background: var(--accent); border-color: #D97706; box-shadow: 0 7px 0 var(--accent-dark), 0 12px 22px rgba(245,158,11,0.35);
       color: #fff; transform: scale(1.08);
     }
     .unit-node.completed {
-      background: var(--success); border-color: var(--success-dark); box-shadow: 0 6px 0 #047857; color: #fff;
+      background: var(--success); border-color: var(--success-dark); box-shadow: 0 7px 0 #047857; color: #fff;
     }
     .unit-node.locked {
       background: #F1F5F9; border-color: #CBD5E1; color: #94A3B8; opacity: 0.85;
     }
     .unit-node:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--border); }
-    .unit-node span { font-size: 30px; }
-    .unit-label { font-size: 13px; font-weight: 800; margin-top: 8px; text-align: center; color: var(--text); }
-    .unit-sub { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .unit-node span { font-size: 28px; }
+    .lvl-badge {
+      position: absolute; top: -6px; right: -8px; background: var(--primary); color: #fff;
+      font-size: 10px; font-weight: 900; padding: 3px 7px; border-radius: 99px; border: 2px solid #fff;
+    }
+    .unit-label {
+      font-size: 13px; font-weight: 800; margin-top: 7px; text-align: center; color: var(--text);
+      background: rgba(255,255,255,0.88); padding: 2px 10px; border-radius: 99px;
+    }
+    .unit-sub { font-size: 11px; color: #475569; font-weight: 700; margin-top: 2px; }
 
     /* Lesson Modal */
     .lesson-modal {
@@ -328,7 +355,7 @@
         <div class="profile-name">Küçük Kaşif</div>
         <div class="profile-rank" id="profileRank">Seviye: Başlangıç (A0)</div>
         <div style="margin-top: 12px; font-size: 14px; color: var(--text-muted); font-weight: 700;">
-          Tamamlanan Ünite: <span id="completedCount">0</span> / 5
+          Tamamlanan Ünite: <span id="completedCount">0</span> / 15
         </div>
       </div>
 
@@ -354,13 +381,14 @@
 
     <div class="complete-screen" id="completeScreen">
       <div class="complete-badge">🎉🦉</div>
-      <h2 style="font-size: 26px; font-weight: 900; color: var(--primary);">Ünite Tamamlandı!</h2>
-      <p style="color: var(--text-muted); font-weight: 700;">Harika bir iş çıkardın!</p>
+      <h2 style="font-size: 26px; font-weight: 900; color: var(--primary);" id="completeTitle">Ünite Tamamlandı!</h2>
+      <p style="color: var(--text-muted); font-weight: 700;" id="completeSub">Harika bir iş çıkardın!</p>
       <div class="complete-stats">
         <div class="stat-box" style="color: var(--primary);">⭐ +25 XP</div>
         <div class="stat-box" style="color: #06B6D4;">💎 +15 Taş</div>
       </div>
-      <button class="btn-action" onclick="finishLesson()">HARİKA! DEVAM ET</button>
+      <button class="btn-action" id="nextUnitBtn" onclick="goToNextUnit()">SONRAKİ ÜNİTEYE GEÇ →</button>
+      <button class="btn-action" style="background:#EDE9FE;color:var(--primary);box-shadow:0 4px 0 var(--primary-light);" onclick="finishLesson()">HARİTAYA DÖN</button>
     </div>
 
     <div class="lesson-footer" id="lessonFooter">
@@ -392,150 +420,307 @@
   </div>
 
   <script>
-    // --- CURRICULUM DATA (5 Units x 5 Varied Questions) ---
+        // --- CURRICULUM DATA (3 Worlds x 5 Units = 15 Units + Dynamic Question Generator) ---
+    const WORLDS = [
+      { id: 1, title: "Dünya 1: Keşif Vadisi", level: "A0", cls: "world-1", decor: ["🌲","🏞️","🌸","💧","🦆","🌳"] },
+      { id: 2, title: "Dünya 2: Deniz & Adalar", level: "A1", cls: "world-2", decor: ["🏝️","⛵","🌊","🐚","🌴","🐬"] },
+      { id: 3, title: "Dünya 3: Bilge Zirve", level: "A1+", cls: "world-3", decor: ["🏔️","🎈","🌟","🏰","☁️","🦉"] }
+    ];
+
     const UNITS = [
       {
-        id: 1, title: "Tanışma", sub: "Selamlaşma & İsim", icon: "👋",
-        questions: [
-          { type: "choice", tag: "Kelime", audio: "Hello", prompt: '"Hello" ne anlama gelir?', options: [
-            { text: "Merhaba", emoji: "👋", correct: true },
-            { text: "Güle güle", emoji: "🚶", correct: false },
-            { text: "Teşekkürler", emoji: "🙏", correct: false },
-            { text: "Lütfen", emoji: "✨", correct: false }
-          ]},
-          { type: "listen", tag: "Dinleme", audio: "Good morning", prompt: "Sesi dinle ve doğru anlamı seç:", options: [
-            { text: "İyi geceler", emoji: "🌙", correct: false },
-            { text: "Günaydın", emoji: "☀️", correct: true },
-            { text: "Nasılsın?", emoji: "🤔", correct: false },
-            { text: "Hoşça kal", emoji: "👋", correct: false }
-          ]},
-          { type: "build", tag: "Cümle Kur", audio: "My name is Pipi", prompt: '"Benim adım Pipi" cümlesini kur:', words: ["Pipi", "name", "is", "My"], answer: "My name is Pipi" },
-          { type: "choice", tag: "Kelime", audio: "Thank you", prompt: '"Thank you" hangi durumda söylenir?', options: [
-            { text: "Özür dilerken", emoji: "😅", correct: false },
-            { text: "Uyurken", emoji: "😴", correct: false },
-            { text: "Teşekkür ederken", emoji: "🙏", correct: true },
-            { text: "Koşarken", emoji: "🏃", correct: false }
-          ]},
-          { type: "build", tag: "Cümle Kur", audio: "How are you", prompt: '"Nasılsın?" sorusunu oluştur:', words: ["you", "How", "are"], answer: "How are you" }
+        id: 1, world: 1, title: "Tanışma", sub: "Selamlaşma", icon: "👋",
+        vocab: [
+          { en: "Hello", tr: "Merhaba", em: "👋" },
+          { en: "Good morning", tr: "Günaydın", em: "☀️" },
+          { en: "Good night", tr: "İyi geceler", em: "🌙" },
+          { en: "Thank you", tr: "Teşekkürler", em: "🙏" },
+          { en: "Goodbye", tr: "Hoşça kal", em: "🚶" },
+          { en: "Please", tr: "Lütfen", em: "✨" },
+          { en: "Sorry", tr: "Özür dilerim", em: "😅" },
+          { en: "Welcome", tr: "Hoş geldin", em: "🤗" }
+        ],
+        sentences: [
+          { tr: "Benim adım Pipi", en: "My name is Pipi" },
+          { tr: "Nasılsın?", en: "How are you" },
+          { tr: "Ben iyiyim", en: "I am fine" },
+          { tr: "Tanıştığıma memnun oldum", en: "Nice to meet you" }
         ]
       },
       {
-        id: 2, title: "Renkler", sub: "Temel Renkler", icon: "🎨",
-        questions: [
-          { type: "choice", tag: "Kelime", audio: "Red", prompt: '"Red" hangi renktir?', options: [
-            { text: "Kırmızı", emoji: "🔴", correct: true },
-            { text: "Mavi", emoji: "🔵", correct: false },
-            { text: "Yeşil", emoji: "🟢", correct: false },
-            { text: "Sarı", emoji: "🟡", correct: false }
-          ]},
-          { type: "listen", tag: "Dinleme", audio: "Blue", prompt: "Duyduğun rengi seç:", options: [
-            { text: "Mor", emoji: "🟣", correct: false },
-            { text: "Mavi", emoji: "🔵", correct: true },
-            { text: "Turuncu", emoji: "🟠", correct: false },
-            { text: "Siyah", emoji: "⚫", correct: false }
-          ]},
-          { type: "choice", tag: "Kelime", audio: "Yellow", prompt: 'Güneş genellikle hangi renktedir? ("Yellow")', options: [
-            { text: "Yeşil", emoji: "🟢", correct: false },
-            { text: "Pembe", emoji: "🩷", correct: false },
-            { text: "Sarı", emoji: "🟡", correct: true },
-            { text: "Beyaz", emoji: "⚪", correct: false }
-          ]},
-          { type: "build", tag: "Cümle Kur", audio: "I like green", prompt: '"Yeşili severim" cümlesini kur:', words: ["green", "I", "like"], answer: "I like green" },
-          { type: "choice", tag: "Kelime", audio: "Purple", prompt: 'Pipi baykuşumuzun rengi "Purple" nedir?', options: [
-            { text: "Kahverengi", emoji: "🟤", correct: false },
-            { text: "Gri", emoji: "🩶", correct: false },
-            { text: "Mor", emoji: "🟣", correct: true },
-            { text: "Kırmızı", emoji: "🔴", correct: false }
-          ]}
+        id: 2, world: 1, title: "Renkler", sub: "Gökkuşağı", icon: "🎨",
+        vocab: [
+          { en: "Red", tr: "Kırmızı", em: "🔴" },
+          { en: "Blue", tr: "Mavi", em: "🔵" },
+          { en: "Green", tr: "Yeşil", em: "🟢" },
+          { en: "Yellow", tr: "Sarı", em: "🟡" },
+          { en: "Purple", tr: "Mor", em: "🟣" },
+          { en: "Orange", tr: "Turuncu", em: "🟠" },
+          { en: "Pink", tr: "Pembe", em: "🩷" },
+          { en: "White", tr: "Beyaz", em: "⚪" }
+        ],
+        sentences: [
+          { tr: "Yeşili severim", en: "I like green" },
+          { tr: "Gökyüzü mavidir", en: "The sky is blue" },
+          { tr: "Mor güzel", en: "Purple is nice" }
         ]
       },
       {
-        id: 3, title: "Sayılar", sub: "1'den 10'a Sayılar", icon: "🔢",
-        questions: [
-          { type: "choice", tag: "Sayılar", audio: "Three", prompt: '"Three" kaçtır?', options: [
-            { text: "1 (Bir)", emoji: "1️⃣", correct: false },
-            { text: "3 (Üç)", emoji: "3️⃣", correct: true },
-            { text: "5 (Beş)", emoji: "5️⃣", correct: false },
-            { text: "8 (Sekiz)", emoji: "8️⃣", correct: false }
-          ]},
-          { type: "listen", tag: "Dinleme", audio: "Seven", prompt: "Sesi dinle, hangi sayı?", options: [
-            { text: "7 (Yedi)", emoji: "7️⃣", correct: true },
-            { text: "2 (İki)", emoji: "2️⃣", correct: false },
-            { text: "6 (Altı)", emoji: "6️⃣", correct: false },
-            { text: "9 (Dokuz)", emoji: "9️⃣", correct: false }
-          ]},
-          { type: "choice", tag: "Sayılar", audio: "Ten", prompt: 'İki elimizdeki toplam parmak sayısı ("Ten"):', options: [
-            { text: "Beş", emoji: "🖐️", correct: false },
-            { text: "On", emoji: "🔟", correct: true },
-            { text: "Dört", emoji: "4️⃣", correct: false },
-            { text: "İki", emoji: "✌️", correct: false }
-          ]},
-          { type: "build", tag: "Cümle Kur", audio: "I have two apples", prompt: '"İki elmam var" cümlesini kur:', words: ["apples", "have", "two", "I"], answer: "I have two apples" },
-          { type: "choice", tag: "Sayılar", audio: "Five", prompt: '"Five" sayısını bul:', options: [
-            { text: "5", emoji: "5️⃣", correct: true },
-            { text: "4", emoji: "4️⃣", correct: false },
-            { text: "1", emoji: "1️⃣", correct: false },
-            { text: "0", emoji: "0️⃣", correct: false }
-          ]}
+        id: 3, world: 1, title: "Sayılar", sub: "1'den 10'a", icon: "🔢",
+        vocab: [
+          { en: "One", tr: "1 (Bir)", em: "1️⃣" },
+          { en: "Two", tr: "2 (İki)", em: "2️⃣" },
+          { en: "Three", tr: "3 (Üç)", em: "3️⃣" },
+          { en: "Four", tr: "4 (Dört)", em: "4️⃣" },
+          { en: "Five", tr: "5 (Beş)", em: "5️⃣" },
+          { en: "Seven", tr: "7 (Yedi)", em: "7️⃣" },
+          { en: "Eight", tr: "8 (Sekiz)", em: "8️⃣" },
+          { en: "Ten", tr: "10 (On)", em: "🔟" }
+        ],
+        sentences: [
+          { tr: "İki elmam var", en: "I have two apples" },
+          { tr: "Üç kedi", en: "Three cats" },
+          { tr: "On yıldız", en: "Ten stars" }
         ]
       },
       {
-        id: 4, title: "Hayvanlar", sub: "Sevimli Dostlar", icon: "🐶",
-        questions: [
-          { type: "choice", tag: "Hayvanlar", audio: "Cat", prompt: '"Cat" hangi hayvandır?', options: [
-            { text: "Köpek", emoji: "🐶", correct: false },
-            { text: "Kedi", emoji: "🐱", correct: true },
-            { text: "Kuş", emoji: "🐦", correct: false },
-            { text: "Balık", emoji: "🐟", correct: false }
-          ]},
-          { type: "listen", tag: "Dinleme", audio: "Owl", prompt: "Pipi nedir? Dinle ve seç:", options: [
-            { text: "Aslan", emoji: "🦁", correct: false },
-            { text: "Tavşan", emoji: "🐰", correct: false },
-            { text: "Baykuş", emoji: "🦉", correct: true },
-            { text: "Fil", emoji: "🐘", correct: false }
-          ]},
-          { type: "build", tag: "Cümle Kur", audio: "The dog is happy", prompt: '"Köpek mutlu" cümlesini kur:', words: ["happy", "dog", "is", "The"], answer: "The dog is happy" },
-          { type: "choice", tag: "Hayvanlar", audio: "Lion", prompt: 'Ormanların kralı "Lion":', options: [
-            { text: "Maymun", emoji: "🐵", correct: false },
-            { text: "Aslan", emoji: "🦁", correct: true },
-            { text: "Kurbağa", emoji: "🐸", correct: false },
-            { text: "Ördek", emoji: "🦆", correct: false }
-          ]},
-          { type: "choice", tag: "Hayvanlar", audio: "Bird", prompt: 'Gökyüzünde uçan "Bird":', options: [
-            { text: "Kuş", emoji: "🐦", correct: true },
-            { text: "Kedi", emoji: "🐱", correct: false },
-            { text: "Ayı", emoji: "🐻", correct: false },
-            { text: "At", emoji: "🐴", correct: false }
-          ]}
+        id: 4, world: 1, title: "Hayvanlar", sub: "Sevimli Dostlar", icon: "🐶",
+        vocab: [
+          { en: "Cat", tr: "Kedi", em: "🐱" },
+          { en: "Dog", tr: "Köpek", em: "🐶" },
+          { en: "Owl", tr: "Baykuş", em: "🦉" },
+          { en: "Bird", tr: "Kuş", em: "🐦" },
+          { en: "Lion", tr: "Aslan", em: "🦁" },
+          { en: "Fish", tr: "Balık", em: "🐟" },
+          { en: "Rabbit", tr: "Tavşan", em: "🐰" },
+          { en: "Monkey", tr: "Maymun", em: "🐵" }
+        ],
+        sentences: [
+          { tr: "Köpek mutlu", en: "The dog is happy" },
+          { tr: "Kedileri severim", en: "I like cats" },
+          { tr: "Kuş uçar", en: "The bird flies" }
         ]
       },
       {
-        id: 5, title: "Pipi Testi", sub: "Büyük Meydan Okuma", icon: "👑",
-        questions: [
-          { type: "build", tag: "Final", audio: "Hello my friend", prompt: '"Merhaba arkadaşım" cümlesini kur:', words: ["friend", "Hello", "my"], answer: "Hello my friend" },
-          { type: "listen", tag: "Dinleme", audio: "I am happy", prompt: "Sesi dinle ve doğru anlamı seç:", options: [
-            { text: "Ben yorgunum", emoji: "😴", correct: false },
-            { text: "Ben mutluyum", emoji: "😄", correct: true },
-            { text: "Ben açım", emoji: "🍕", correct: false },
-            { text: "Ben üzgünüm", emoji: "😢", correct: false }
-          ]},
-          { type: "choice", tag: "Final", audio: "Good night", prompt: 'Yatmadan önce ne deriz? ("Good night")', options: [
-            { text: "Günaydın", emoji: "☀️", correct: false },
-            { text: "İyi geceler", emoji: "🌙", correct: true },
-            { text: "Afiyet olsun", emoji: "🍽️", correct: false },
-            { text: "Görüşürüz", emoji: "👋", correct: false }
-          ]},
-          { type: "build", tag: "Final", audio: "Pipi is a blue owl", prompt: '"Pipi mavi bir baykuş" cümlesini kur:', words: ["owl", "is", "blue", "Pipi", "a"], answer: "Pipi is a blue owl" },
-          { type: "choice", tag: "Final", audio: "You are amazing", prompt: '"You are amazing!" ne demektir?', options: [
-            { text: "Sen harikasın!", emoji: "🌟", correct: true },
-            { text: "Çok geç oldu", emoji: "⏰", correct: false },
-            { text: "Hava soğuk", emoji: "❄️", correct: false },
-            { text: "İyi şanslar", emoji: "🍀", correct: false }
-          ]}
+        id: 5, world: 1, title: "Pipi Testi 1", sub: "Vadi Finali", icon: "👑", isBoss: true,
+        vocab: [
+          { en: "Friend", tr: "Arkadaş", em: "🤝" },
+          { en: "Amazing", tr: "Harika", em: "🌟" },
+          { en: "Star", tr: "Yıldız", em: "⭐" },
+          { en: "Forest", tr: "Orman", em: "🌲" },
+          { en: "Water", tr: "Su", em: "💧" },
+          { en: "Happy", tr: "Mutlu", em: "😄" }
+        ],
+        sentences: [
+          { tr: "Merhaba arkadaşım", en: "Hello my friend" },
+          { tr: "Pipi mor bir baykuş", en: "Pipi is a purple owl" },
+          { tr: "Sen harikasın", en: "You are amazing" }
+        ]
+      },
+      {
+        id: 6, world: 2, title: "Ailem", sub: "Ev ve Aile", icon: "🏠",
+        vocab: [
+          { en: "Mother", tr: "Anne", em: "👩" },
+          { en: "Father", tr: "Baba", em: "👨" },
+          { en: "Sister", tr: "Kız kardeş", em: "👧" },
+          { en: "Brother", tr: "Erkek kardeş", em: "👦" },
+          { en: "Home", tr: "Ev", em: "🏠" },
+          { en: "Family", tr: "Aile", em: "👨‍👩‍👧‍👦" }
+        ],
+        sentences: [
+          { tr: "Ailemi seviyorum", en: "I love my family" },
+          { tr: "Bu benim evim", en: "This is my home" }
+        ]
+      },
+      {
+        id: 7, world: 2, title: "Yiyecekler", sub: "Meyve & Sofra", icon: "🍎",
+        vocab: [
+          { en: "Apple", tr: "Elma", em: "🍎" },
+          { en: "Banana", tr: "Muz", em: "🍌" },
+          { en: "Bread", tr: "Ekmek", em: "🍞" },
+          { en: "Milk", tr: "Süt", em: "🥛" },
+          { en: "Cheese", tr: "Peynir", em: "🧀" },
+          { en: "Cake", tr: "Pasta", em: "🍰" }
+        ],
+        sentences: [
+          { tr: "Süt içerim", en: "I drink milk" },
+          { tr: "Kırmızı bir elma", en: "A red apple" }
+        ]
+      },
+      {
+        id: 8, world: 2, title: "Duygular", sub: "Nasıl Hissediyoruz?", icon: "😊",
+        vocab: [
+          { en: "Happy", tr: "Mutlu", em: "😄" },
+          { en: "Sad", tr: "Üzgün", em: "😢" },
+          { en: "Tired", tr: "Yorgun", em: "😴" },
+          { en: "Excited", tr: "Heyecanlı", em: "🤩" },
+          { en: "Hungry", tr: "Aç", em: "🍕" },
+          { en: "Brave", tr: "Cesur", em: "🦸" }
+        ],
+        sentences: [
+          { tr: "Ben çok mutluyum", en: "I am very happy" },
+          { tr: "O yorgun değil", en: "He is not tired" }
+        ]
+      },
+      {
+        id: 9, world: 2, title: "Meslekler", sub: "Kim Ne Yapar?", icon: "👩‍🏫",
+        vocab: [
+          { en: "Teacher", tr: "Öğretmen", em: "👩‍🏫" },
+          { en: "Doctor", tr: "Doktor", em: "👨‍⚕️" },
+          { en: "Pilot", tr: "Pilot", em: "👩‍✈️" },
+          { en: "Chef", tr: "Aşçı", em: "👨‍🍳" },
+          { en: "Artist", tr: "Ressam", em: "🎨" },
+          { en: "Farmer", tr: "Çiftçi", em: "🌾" }
+        ],
+        sentences: [
+          { tr: "Annem bir doktor", en: "My mother is a doctor" },
+          { tr: "Ben bir öğrenciyim", en: "I am a student" }
+        ]
+      },
+      {
+        id: 10, world: 2, title: "Ada Testi", sub: "Deniz Finali", icon: "🏆", isBoss: true,
+        vocab: [
+          { en: "Island", tr: "Ada", em: "🏝️" },
+          { en: "Sea", tr: "Deniz", em: "🌊" },
+          { en: "Boat", tr: "Tekne", em: "⛵" },
+          { en: "Sun", tr: "Güneş", em: "☀️" },
+          { en: "Shell", tr: "Deniz kabuğu", em: "🐚" },
+          { en: "Sand", tr: "Kum", em: "🏖️" }
+        ],
+        sentences: [
+          { tr: "Deniz mavidir", en: "The sea is blue" },
+          { tr: "Adada güneş var", en: "There is sun on the island" }
+        ]
+      },
+      {
+        id: 11, world: 3, title: "Hava & Giyim", sub: "Mevsimler", icon: "🧥",
+        vocab: [
+          { en: "Sunny", tr: "Güneşli", em: "☀️" },
+          { en: "Rainy", tr: "Yağmurlu", em: "🌧️" },
+          { en: "Snowy", tr: "Karlı", em: "❄️" },
+          { en: "Hat", tr: "Şapka", em: "👒" },
+          { en: "Coat", tr: "Mont", em: "🧥" },
+          { en: "Shoes", tr: "Ayakkabı", em: "👟" }
+        ],
+        sentences: [
+          { tr: "Bugün hava güneşli", en: "Today it is sunny" },
+          { tr: "Şapkamı takarım", en: "I wear my hat" }
+        ]
+      },
+      {
+        id: 12, world: 3, title: "Zaman & Günler", sub: "Saatler", icon: "⏰",
+        vocab: [
+          { en: "Today", tr: "Bugün", em: "📅" },
+          { en: "Tomorrow", tr: "Yarın", em: "🌅" },
+          { en: "Morning", tr: "Sabah", em: "🌄" },
+          { en: "Evening", tr: "Akşam", em: "🌆" },
+          { en: "Clock", tr: "Saat", em: "⏰" },
+          { en: "Week", tr: "Hafta", em: "🗓️" }
+        ],
+        sentences: [
+          { tr: "Yarın okula gidiyorum", en: "Tomorrow I go to school" },
+          { tr: "Saat kaç?", en: "What time is it" }
+        ]
+      },
+      {
+        id: 13, world: 3, title: "Ulaşım", sub: "Şehir & Yollar", icon: "🚀",
+        vocab: [
+          { en: "Car", tr: "Araba", em: "🚗" },
+          { en: "Bus", tr: "Otobüs", em: "🚌" },
+          { en: "Train", tr: "Tren", em: "🚂" },
+          { en: "Plane", tr: "Uçak", em: "✈️" },
+          { en: "Bike", tr: "Bisiklet", em: "🚲" },
+          { en: "Rocket", tr: "Roket", em: "🚀" }
+        ],
+        sentences: [
+          { tr: "Uçak çok hızlı", en: "The plane is very fast" },
+          { tr: "Bisikletim kırmızı", en: "My bike is red" }
+        ]
+      },
+      {
+        id: 14, world: 3, title: "Hareketler", sub: "Fiiller & Spor", icon: "⚽",
+        vocab: [
+          { en: "Run", tr: "Koşmak", em: "🏃" },
+          { en: "Jump", tr: "Zıplamak", em: "🦘" },
+          { en: "Read", tr: "Okumak", em: "📖" },
+          { en: "Sing", tr: "Şarkı söylemek", em: "🎤" },
+          { en: "Play", tr: "Oynamak", em: "⚽" },
+          { en: "Sleep", tr: "Uyumak", em: "😴" }
+        ],
+        sentences: [
+          { tr: "Ben hızlı koşarım", en: "I can run fast" },
+          { tr: "Kitap okumayı severim", en: "I like to read books" }
+        ]
+      },
+      {
+        id: 15, world: 3, title: "Büyük Şampiyona", sub: "Zirve Finali", icon: "🎓", isBoss: true,
+        vocab: [
+          { en: "Champion", tr: "Şampiyon", em: "🏆" },
+          { en: "Future", tr: "Gelecek", em: "🚀" },
+          { en: "Dream", tr: "Hayal", em: "💭" },
+          { en: "Smart", tr: "Akıllı", em: "🧠" },
+          { en: "World", tr: "Dünya", em: "🌍" },
+          { en: "Success", tr: "Başarı", em: "🎯" }
+        ],
+        sentences: [
+          { tr: "Ben akıllı bir kaşifim", en: "I am a smart explorer" },
+          { tr: "İngilizce konuşabiliyorum", en: "I can speak English" }
         ]
       }
     ];
 
+    function shuffleArr(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildDynamicLesson(unit) {
+      const qs = [];
+      const vPool = shuffleArr(unit.vocab);
+      const allOtherVocab = UNITS.flatMap(u => u.vocab).filter(v => !unit.vocab.some(uv => uv.en === v.en));
+
+      const countVocab = Math.min(3, vPool.length);
+      for (let i = 0; i < countVocab; i++) {
+        const target = vPool[i];
+        const distractors = shuffleArr(unit.vocab.filter(x => x.en !== target.en).concat(allOtherVocab)).slice(0, 3);
+        const mode = Math.floor(Math.random() * 3);
+        if (mode === 0) {
+          qs.push({
+            type: "choice", tag: "Kelime", audio: target.en,
+            prompt: `"${target.en}" ne anlama gelir?`,
+            options: shuffleArr([{ text: target.tr, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.tr, emoji: d.em, correct: false }))))
+          });
+        } else if (mode === 1) {
+          qs.push({
+            type: "listen", tag: "Dinleme", audio: target.en,
+            prompt: "Sesi dinle ve doğru anlamı seç:",
+            options: shuffleArr([{ text: target.tr, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.tr, emoji: d.em, correct: false }))))
+          });
+        } else {
+          qs.push({
+            type: "choice", tag: "Çeviri", audio: target.en,
+            prompt: `"${target.tr}" kelimesinin İngilizcesi hangisi?`,
+            options: shuffleArr([{ text: target.en, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.en, emoji: d.em, correct: false }))))
+          });
+        }
+      }
+
+      const sPool = shuffleArr(unit.sentences).slice(0, 2);
+      sPool.forEach(s => {
+        qs.push({
+          type: "build", tag: "Cümle Kur", audio: s.en,
+          prompt: `"${s.tr}" cümlesini kur:`,
+          words: shuffleArr(s.en.split(" ")),
+          answer: s.en
+        });
+      });
+
+      return shuffleArr(qs);
+    }
     // --- STATE ---
     let state = JSON.parse(localStorage.getItem('pipitalk_state') || 'null') || {
       xp: 0, gems: 120, hearts: 5, streak: 3, completedUnits: []
@@ -585,35 +770,83 @@
       } catch (e) {}
     }
 
-    // --- RENDER PATH ---
+    // --- RENDER ADVENTURE MAP PATH ---
     function renderPath() {
       const container = document.getElementById('unitPath');
-      container.innerHTML = `
-        <div class="world-header">
-          <span>Dünya 1: Keşif Vadisi</span>
-          <span>A0 (${state.completedUnits.length}/5)</span>
-        </div>
-      `;
-      UNITS.forEach((u, idx) => {
-        const isDone = state.completedUnits.includes(u.id);
-        const isNext = !isDone && (idx === 0 || state.completedUnits.includes(UNITS[idx - 1].id));
-        const cls = isDone ? 'completed' : (isNext ? 'active' : '');
-        const node = document.createElement('div');
-        node.className = 'unit-wrap';
-        node.innerHTML = `
-          <div class="unit-node ${cls}" onclick="startLesson(${u.id})">
-            <span>${u.icon}</span>
-          </div>
-          <div class="unit-label">${u.id}. ${u.title}</div>
-          <div class="unit-sub">${u.sub}</div>
+      container.innerHTML = '';
+      if (!state.unitLevels) state.unitLevels = {};
+
+      WORLDS.forEach(world => {
+        const wUnits = UNITS.filter(u => u.world === world.id);
+        const doneInWorld = wUnits.filter(u => state.completedUnits.includes(u.id)).length;
+
+        const sec = document.createElement('div');
+        sec.className = `world-section ${world.cls}`;
+
+        const header = document.createElement('div');
+        header.className = 'world-header';
+        header.innerHTML = `<span>${world.title}</span><span>${world.level} (${doneInWorld}/${wUnits.length})</span>`;
+        sec.appendChild(header);
+
+        const track = document.createElement('div');
+        track.className = 'map-track';
+
+        // Winding SVG road background
+        track.innerHTML = `
+          <svg class="map-svg-bg" viewBox="0 0 300 500" preserveAspectRatio="none">
+            <path d="M 150 25 C 240 80, 240 140, 150 190 C 60 240, 60 310, 150 360 C 230 410, 220 460, 150 485"
+                  stroke="#FDE68A" stroke-width="26" stroke-linecap="round" fill="none" opacity="0.85"/>
+            <path d="M 150 25 C 240 80, 240 140, 150 190 C 60 240, 60 310, 150 360 C 230 410, 220 460, 150 485"
+                  stroke="#F59E0B" stroke-width="4" stroke-dasharray="10 10" stroke-linecap="round" fill="none"/>
+          </svg>
         `;
-        container.appendChild(node);
+
+        // Scenery islands/trees/water on left and right
+        const positions = [
+          { top: '8%', left: '8%' }, { top: '22%', right: '8%' },
+          { top: '44%', left: '6%' }, { top: '58%', right: '10%' },
+          { top: '78%', left: '10%' }, { top: '84%', right: '8%' }
+        ];
+        world.decor.forEach((em, i) => {
+          const dec = document.createElement('div');
+          dec.className = 'scenery-dec';
+          dec.innerText = em;
+          Object.assign(dec.style, positions[i % positions.length]);
+          track.appendChild(dec);
+        });
+
+        const alignPattern = ['center', 'right', 'center', 'left', 'center'];
+        wUnits.forEach((u, idx) => {
+          const isDone = state.completedUnits.includes(u.id);
+          const globalIdx = UNITS.findIndex(x => x.id === u.id);
+          const isNext = !isDone && (globalIdx === 0 || state.completedUnits.includes(UNITS[globalIdx - 1].id));
+          const cls = isDone ? 'completed' : (isNext ? 'active' : '');
+          const lvl = state.unitLevels[u.id] || 1;
+
+          const row = document.createElement('div');
+          row.className = `map-row ${alignPattern[idx % alignPattern.length]}`;
+          row.innerHTML = `
+            <div class="unit-wrap">
+              <div class="unit-node ${cls}" onclick="startLesson(${u.id})">
+                <span>${u.icon}</span>
+                <div class="lvl-badge">Sv.${lvl}</div>
+              </div>
+              <div class="unit-label">${u.id}. ${u.title}</div>
+              <div class="unit-sub">${u.sub}</div>
+            </div>
+          `;
+          track.appendChild(row);
+        });
+
+        sec.appendChild(track);
+        container.appendChild(sec);
       });
       renderProfile();
     }
 
     // --- LESSON ENGINE ---
     let currentUnit = null;
+    let currentQuestions = [];
     let currentQIndex = 0;
     let selectedOption = null;
     let builtWords = [];
@@ -622,6 +855,7 @@
 
     function startLesson(unitId) {
       currentUnit = UNITS.find(u => u.id === unitId);
+      currentQuestions = buildDynamicLesson(currentUnit);
       currentQIndex = 0;
       document.getElementById('completeScreen').style.display = 'none';
       document.getElementById('lessonBody').style.display = 'flex';
@@ -636,8 +870,8 @@
     }
 
     function renderQuestion() {
-      const q = currentUnit.questions[currentQIndex];
-      const total = currentUnit.questions.length;
+      const q = currentQuestions[currentQIndex];
+      const total = currentQuestions.length;
       document.getElementById('progressBar').style.width = ((currentQIndex / total) * 100) + '%';
       document.getElementById('qCounter').innerText = (currentQIndex + 1) + '/' + total;
       document.getElementById('feedbackSheet').style.display = 'none';
@@ -708,7 +942,7 @@
     }
 
     function checkAnswer() {
-      const q = currentUnit.questions[currentQIndex];
+      const q = currentQuestions[currentQIndex];
       if (q.type === 'choice' || q.type === 'listen') {
         lastCorrect = q.options[selectedOption].correct;
       } else if (q.type === 'build') {
@@ -738,7 +972,7 @@
     function nextQuestion() {
       document.getElementById('feedbackSheet').style.display = 'none';
       currentQIndex++;
-      if (currentQIndex < currentUnit.questions.length) {
+      if (currentQIndex < currentQuestions.length) {
         renderQuestion();
       } else {
         // Lesson Complete!
@@ -751,8 +985,23 @@
         if (!state.completedUnits.includes(currentUnit.id)) {
           state.completedUnits.push(currentUnit.id);
         }
+        if (!state.unitLevels) state.unitLevels = {};
+        state.unitLevels[currentUnit.id] = (state.unitLevels[currentUnit.id] || 1) + 1;
+        const nextU = UNITS.find(u => u.id === currentUnit.id + 1);
+        document.getElementById('nextUnitBtn').style.display = nextU ? 'block' : 'none';
+        document.getElementById('completeTitle').innerText = currentUnit.isBoss ? '🏆 Bölüm Finali Geçildi!' : '🎉 Ünite Tamamlandı!';
         saveState();
         playChime(true);
+      }
+    }
+
+    function goToNextUnit() {
+      const nextId = currentUnit.id + 1;
+      const nextU = UNITS.find(u => u.id === nextId);
+      if (nextU) {
+        startLesson(nextId);
+      } else {
+        finishLesson();
       }
     }
 
@@ -1132,3 +1381,4 @@
   </script>
 </body>
 </html>
+
