@@ -90,7 +90,7 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
         });
     }
 
-    private void startNativeListening() {
+    private void startNativeListening(final String langCode) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -133,7 +133,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
 
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+                String targetLang = (langCode != null && !langCode.isEmpty()) ? langCode : "en-US";
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, targetLang);
                 intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
                 speechRecognizer.startListening(intent);
             }
@@ -143,14 +144,29 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
     public class PipiBridge {
         @JavascriptInterface
         public void speak(String text) {
+            speakWithLang(text, "en-US");
+        }
+
+        @JavascriptInterface
+        public void speakWithLang(String text, String langCode) {
             if (ttsReady && tts != null && text != null) {
+                if ("tr-TR".equals(langCode)) {
+                    tts.setLanguage(new Locale("tr", "TR"));
+                } else {
+                    tts.setLanguage(Locale.US);
+                }
                 tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pipi_tts");
             }
         }
 
         @JavascriptInterface
         public void startListening() {
-            startNativeListening();
+            startNativeListening("en-US");
+        }
+
+        @JavascriptInterface
+        public void startListeningLang(String langCode) {
+            startNativeListening(langCode);
         }
     }
 
