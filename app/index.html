@@ -342,21 +342,31 @@
     <div id="tab-learn" class="tab-page active">
       <div class="pipi-card">
         <svg class="pipi-avatar" viewBox="0 0 100 100">
-          <circle cx="50" cy="55" r="38" fill="#8B5CF6"/>
-          <circle cx="50" cy="62" r="26" fill="#EDE9FE"/>
-          <circle cx="36" cy="45" r="14" fill="#FFFFFF"/>
-          <circle cx="64" cy="45" r="14" fill="#FFFFFF"/>
-          <circle cx="38" cy="45" r="7" fill="#1E1B4B"/>
-          <circle cx="62" cy="45" r="7" fill="#1E1B4B"/>
-          <circle cx="41" cy="42" r="2.5" fill="#FFFFFF"/>
-          <circle cx="65" cy="42" r="2.5" fill="#FFFFFF"/>
-          <polygon points="50,52 44,60 56,60" fill="#F59E0B"/>
-          <path d="M12 55 Q 8 70 20 78" stroke="#7C3AED" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <path d="M88 55 Q 92 70 80 78" stroke="#7C3AED" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <polygon points="50,14 43,24 57,24" fill="#F59E0B"/>
+          <!-- Pipi Papağan Maskotu (Özgün SVG) -->
+          <!-- Tepe Tüyleri -->
+          <path d="M44 16 Q38 4 50 10 Q56 2 60 15 Z" fill="#F59E0B"/>
+          <path d="M52 15 Q58 4 66 14 Z" fill="#EF4444"/>
+          <!-- Kuyruk -->
+          <path d="M36 82 L28 96 L42 90 L48 97 L54 84 Z" fill="#06B6D4"/>
+          <!-- Gövde -->
+          <ellipse cx="50" cy="56" rx="33" ry="34" fill="#10B981"/>
+          <ellipse cx="52" cy="65" rx="21" ry="22" fill="#FEF08A"/>
+          <!-- Göz Çevresi & Gözler -->
+          <circle cx="38" cy="43" r="12" fill="#FFFFFF"/>
+          <circle cx="62" cy="43" r="12" fill="#FFFFFF"/>
+          <circle cx="40" cy="43" r="6" fill="#1E293B"/>
+          <circle cx="60" cy="43" r="6" fill="#1E293B"/>
+          <circle cx="42" cy="40" r="2.2" fill="#FFFFFF"/>
+          <circle cx="62" cy="40" r="2.2" fill="#FFFFFF"/>
+          <!-- Kıvrımlı Papağan Gagası -->
+          <path d="M44 50 Q50 45 56 50 Q56 62 50 64 Q44 60 44 50 Z" fill="#F97316"/>
+          <path d="M46 56 Q50 60 54 56" stroke="#C2410C" stroke-width="2" fill="none"/>
+          <!-- Renkli Kanatlar -->
+          <path d="M17 50 Q10 68 24 76 Q30 62 24 50 Z" fill="#3B82F6"/>
+          <path d="M83 50 Q90 68 76 76 Q70 62 76 50 Z" fill="#3B82F6"/>
         </svg>
         <div class="pipi-bubble" id="pipiGreeting">
-          Merhaba! Ben <strong>Pipi</strong>. Tam <strong>50 Ünitelik</strong> büyük macera seni bekliyor! Hadi başlayalım! 🦉✨
+          Merhaba! Ben <strong>Pipi</strong>. Tam <strong>50 Ünitelik</strong> büyük macera seni bekliyor! Hadi başlayalım! 🦜✨
         </div>
       </div>
 
@@ -366,7 +376,7 @@
     <!-- TAB 2: PİPİ AI -->
     <div id="tab-ai" class="tab-page">
       <div class="ai-header">
-        <div style="font-size: 38px;">🦉</div>
+        <div style="font-size: 38px;">🦜</div>
         <div>
           <div style="font-weight: 900; font-size: 17px;">Pipi AI Konuşma Koçu</div>
           <div style="font-size: 13px; opacity: 0.9;">İngilizce yaz veya seç, Pipi sesli cevap versin!</div>
@@ -398,7 +408,7 @@
     <!-- TAB 3: PROFİL -->
     <div id="tab-profile" class="tab-page">
       <div class="profile-card">
-        <div style="font-size: 54px;">🦉</div>
+        <div style="font-size: 54px;">🦜</div>
         <div class="profile-name">Küçük Kaşif</div>
         <div class="profile-rank" id="profileRank">Seviye: Başlangıç (A0)</div>
         <div style="margin-top: 12px; font-size: 14px; color: var(--text-muted); font-weight: 700;">
@@ -427,7 +437,7 @@
     <div class="lesson-body" id="lessonBody"></div>
 
     <div class="complete-screen" id="completeScreen">
-      <div class="complete-badge">🎉🦉</div>
+      <div class="complete-badge">🎉🦜</div>
       <h2 style="font-size: 26px; font-weight: 900; color: var(--primary);" id="completeTitle">Ünite Tamamlandı!</h2>
       <p style="color: var(--text-muted); font-weight: 700;" id="completeSub">Harika bir iş çıkardın!</p>
       <div class="complete-stats">
@@ -473,7 +483,7 @@
       { id: 2, title: "Dünya 2: Deniz & Adalar", level: "A1", cls: "world-2", decor: ["🏝️","⛵","🌊","🐚","🌴","🐬"] },
       { id: 3, title: "Dünya 3: Doğa & Macera", level: "A1+", cls: "world-1", decor: ["🏕️","🦁","🌈","🦊","🌻","🦋"] },
       { id: 4, title: "Dünya 4: İletişim Şehri", level: "A2", cls: "world-2", decor: ["🏙️","🚀","🎭","🎡","🛸","🎈"] },
-      { id: 5, title: "Dünya 5: Bilge Zirve", level: "A2+", cls: "world-3", decor: ["🏔️","🌟","🏰","👑","🎓","🦉"] }
+      { id: 5, title: "Dünya 5: Bilge Zirve", level: "A2+", cls: "world-3", decor: ["🏔️","🌟","🏰","👑","🎓","🦜"] }
     ];
 
     const RAW_UNITS = [
@@ -481,13 +491,13 @@
       [1, 1, "Tanışma", "Selamlaşma", "👋", [["Hello","Merhaba","👋"],["Good morning","Günaydın","☀️"],["Good night","İyi geceler","🌙"],["Thank you","Teşekkürler","🙏"],["Goodbye","Hoşça kal","🚶"]], [["Benim adım Pipi","My name is Pipi"],["Nasılsın?","How are you"]]],
       [2, 1, "Renkler", "Gökkuşağı", "🎨", [["Red","Kırmızı","🔴"],["Blue","Mavi","🔵"],["Green","Yeşil","🟢"],["Yellow","Sarı","🟡"],["Purple","Mor","🟣"]], [["Yeşili severim","I like green"],["Gökyüzü mavidir","The sky is blue"]]],
       [3, 1, "Sayılar 1-10", "Sayma", "🔢", [["One","Bir","1️⃣"],["Three","Üç","3️⃣"],["Five","Beş","5️⃣"],["Seven","Yedi","7️⃣"],["Ten","On","🔟"]], [["İki elmam var","I have two apples"],["Üç kedi","Three cats"]]],
-      [4, 1, "Hayvanlar", "Sevimli Dostlar", "🐶", [["Cat","Kedi","🐱"],["Dog","Köpek","🐶"],["Owl","Baykuş","🦉"],["Bird","Kuş","🐦"],["Lion","Aslan","🦁"]], [["Köpek mutlu","The dog is happy"],["Kedileri severim","I like cats"]]],
+      [4, 1, "Hayvanlar", "Sevimli Dostlar", "🐶", [["Cat","Kedi","🐱"],["Dog","Köpek","🐶"],["Owl","Papağan","🦜"],["Bird","Kuş","🐦"],["Lion","Aslan","🦁"]], [["Köpek mutlu","The dog is happy"],["Kedileri severim","I like cats"]]],
       [5, 1, "Ailem", "Ev ve Aile", "🏠", [["Mother","Anne","👩"],["Father","Baba","👨"],["Sister","Kız kardeş","👧"],["Brother","Erkek kardeş","👦"],["Home","Ev","🏠"]], [["Ailemi seviyorum","I love my family"],["Bu benim evim","This is my home"]]],
       [6, 1, "Meyveler", "Tatlı Sepet", "🍎", [["Apple","Elma","🍎"],["Banana","Muz","🍌"],["Orange","Portakal","🍊"],["Grape","Üzüm","🍇"],["Strawberry","Çilek","🍓"]], [["Kırmızı bir elma","A red apple"],["Muz severim","I like bananas"]]],
       [7, 1, "Kıyafetler", "Dolabım", "👕", [["Shirt","Gömlek","👕"],["Hat","Şapka","👒"],["Shoes","Ayakkabı","👟"],["Coat","Mont","🧥"],["Dress","Elbise","👗"]], [["Şapkamı takarım","I wear my hat"],["Mavi ayakkabılar","Blue shoes"]]],
       [8, 1, "Bedenim", "Hareket", "💪", [["Hand","El","✋"],["Eye","Göz","👁️"],["Ear","Kulak","👂"],["Nose","Burun","👃"],["Foot","Ayak","🦶"]], [["İki elim var","I have two hands"],["Gözlerimi açarım","I open my eyes"]]],
       [9, 1, "Oyuncaklar", "Oyun Zamanı", "🧸", [["Ball","Top","⚽"],["Toy","Oyuncak","🧸"],["Kite","Uçurtma","🪁"],["Robot","Robot","🤖"],["Puzzle","Yapboz","🧩"]], [["Topum kırmızı","My ball is red"],["Oyun oynayalım","Let us play"]]],
-      [10, 1, "Vadi Testi", "Bölüm 1 Finali", "👑", [["Friend","Arkadaş","🤝"],["Star","Yıldız","⭐"],["Happy","Mutlu","😄"],["Smart","Akıllı","🧠"],["Winner","Kazanan","🏆"]], [["Merhaba arkadaşım","Hello my friend"],["Pipi mor bir baykuş","Pipi is a purple owl"]]],
+      [10, 1, "Vadi Testi", "Bölüm 1 Finali", "👑", [["Friend","Arkadaş","🤝"],["Star","Yıldız","⭐"],["Happy","Mutlu","😄"],["Smart","Akıllı","🧠"],["Winner","Kazanan","🏆"]], [["Merhaba arkadaşım","Hello my friend"],["Pipi renkli bir papağan","Pipi is a colorful parrot"]]],
 
       // Dünya 2 (11-20)
       [11, 2, "Kahvaltı", "Sabah Sofrası", "🍳", [["Bread","Ekmek","🍞"],["Milk","Süt","🥛"],["Cheese","Peynir","🧀"],["Egg","Yumurta","🥚"],["Honey","Bal","🍯"]], [["Süt içerim","I drink milk"],["Ekmek ve peynir","Bread and cheese"]]],
@@ -823,26 +833,29 @@
           </div>
           <div class="pipi-sparkles">✨🎉⭐🎉✨</div>
           <svg class="pipi-stage-svg" viewBox="0 0 100 100">
-            <circle cx="50" cy="55" r="38" fill="#8B5CF6"/>
-            <circle cx="50" cy="62" r="26" fill="#EDE9FE"/>
+            <path d="M44 16 Q38 4 50 10 Q56 2 60 15 Z" fill="#F59E0B"/>
+            <path d="M52 15 Q58 4 66 14 Z" fill="#EF4444"/>
+            <path d="M36 82 L28 96 L42 90 L48 97 L54 84 Z" fill="#06B6D4"/>
+            <ellipse cx="50" cy="56" rx="33" ry="34" fill="#10B981"/>
+            <ellipse cx="52" cy="65" rx="21" ry="22" fill="#FEF08A"/>
             <g id="pipiEyesNormal">
-              <circle cx="36" cy="45" r="14" fill="#FFFFFF"/>
-              <circle cx="64" cy="45" r="14" fill="#FFFFFF"/>
-              <circle cx="38" cy="45" r="7" fill="#1E1B4B"/>
-              <circle cx="62" cy="45" r="7" fill="#1E1B4B"/>
-              <circle cx="41" cy="42" r="2.5" fill="#FFFFFF"/>
-              <circle cx="65" cy="42" r="2.5" fill="#FFFFFF"/>
+              <circle cx="38" cy="43" r="12" fill="#FFFFFF"/>
+              <circle cx="62" cy="43" r="12" fill="#FFFFFF"/>
+              <circle cx="40" cy="43" r="6" fill="#1E293B"/>
+              <circle cx="60" cy="43" r="6" fill="#1E293B"/>
+              <circle cx="42" cy="40" r="2.2" fill="#FFFFFF"/>
+              <circle cx="62" cy="40" r="2.2" fill="#FFFFFF"/>
             </g>
             <g id="pipiEyesHappy" style="display:none;">
-              <path d="M26 47 Q36 35 46 47" stroke="#1E1B4B" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-              <path d="M54 47 Q64 35 74 47" stroke="#1E1B4B" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+              <path d="M29 45 Q38 35 47 45" stroke="#1E293B" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <path d="M53 45 Q62 35 71 45" stroke="#1E293B" stroke-width="4" stroke-linecap="round" fill="none"/>
             </g>
-            <polygon points="50,52 44,60 56,60" fill="#F59E0B"/>
-            <path d="M12 55 Q 6 68 20 78" stroke="#7C3AED" stroke-width="8" stroke-linecap="round" fill="none"/>
-            <path d="M88 55 Q 94 68 80 78" stroke="#7C3AED" stroke-width="8" stroke-linecap="round" fill="none"/>
-            <polygon points="50,14 43,24 57,24" fill="#F59E0B"/>
+            <path d="M44 50 Q50 45 56 50 Q56 62 50 64 Q44 60 44 50 Z" fill="#F97316"/>
+            <path d="M46 56 Q50 60 54 56" stroke="#C2410C" stroke-width="2" fill="none"/>
+            <path d="M17 50 Q10 68 24 76 Q30 62 24 50 Z" fill="#3B82F6"/>
+            <path d="M83 50 Q90 68 76 76 Q70 62 76 50 Z" fill="#3B82F6"/>
           </svg>
-          <div class="pipi-stage-msg" id="pipiStageMsg">Hadi, sen yaparsın! 🦉</div>
+          <div class="pipi-stage-msg" id="pipiStageMsg">Hadi, sen yaparsın! 🦜</div>
         </div>
       `;
 
@@ -904,7 +917,7 @@
         if (lastCorrect) {
           if (eyesN) eyesN.style.display = 'none';
           if (eyesH) eyesH.style.display = 'block';
-          if (stageMsg) stageMsg.innerText = 'Yaşasın! Çok iyi bildin! 🎉🦉';
+          if (stageMsg) stageMsg.innerText = 'Yaşasın! Çok iyi bildin! 🎉🦜';
         } else {
           if (stageMsg) stageMsg.innerText = 'Sorun değil, bir dahakine! 💪';
         }
@@ -989,7 +1002,7 @@
         chips: ["I like blue", "I like red", "Yellow is nice"]
       },
       hayvanlar: {
-        greet: { en: "I am an owl! Do you like cats or dogs?", tr: "Ben bir baykuşum! Kedileri mi köpekleri mi seversin?" },
+        greet: { en: "I am an owl! Do you like cats or dogs?", tr: "Ben bir papağanum! Kedileri mi köpekleri mi seversin?" },
         chips: ["I like cats", "I like dogs", "I love owls!"]
       },
       gunluk: {
@@ -1251,7 +1264,7 @@
           const capName = candidate.charAt(0).toUpperCase() + candidate.slice(1);
           reply = pickRandom([
             { en: `Nice to meet you, ${capName}! That is a lovely name. +5 XP!`, tr: `Tanıştığımıza memnun oldum, ${capName}! Çok güzel bir isim. +5 XP!`, chips: ["Thank you!", "How are you?", "I like blue"] },
-            { en: `Welcome, ${capName}! I am Pipi the Owl. What animal do you like?`, tr: `Hoş geldin, ${capName}! Ben Baykuş Pipi. Hangi hayvanı seversin?`, chips: ["I like lions", "I like dogs", "I like birds"] }
+            { en: `Welcome, ${capName}! I am Pipi the Parrot. What animal do you like?`, tr: `Hoş geldin, ${capName}! Ben Papağan Pipi. Hangi hayvanı seversin?`, chips: ["I like lions", "I like dogs", "I like birds"] }
           ]);
           state.xp += 5; saveState();
         }
@@ -1259,7 +1272,7 @@
       // 6. Duygular
       else if (/\b(happy|great|good|fine|amazing|super|sad|tired)\b/.test(low)) {
         if (low.includes("sad") || low.includes("tired")) {
-          reply = { en: "Oh no! Sending you a big owl hug! Let's play a fun game.", tr: "Ah, kıyamam! Sana kocaman bir baykuş sarılması! Hadi eğlenceli bir oyun oynayalım.", chips: ["Thank you Pipi", "I am happy now"] };
+          reply = { en: "Oh no! Sending you a big owl hug! Let's play a fun game.", tr: "Ah, kıyamam! Sana kocaman bir papağan sarılması! Hadi eğlenceli bir oyun oynayalım.", chips: ["Thank you Pipi", "I am happy now"] };
         } else {
           reply = pickRandom([
             { en: "Yay! I love hearing that! +5 XP for your positive energy!", tr: "Yaşasın! Bunu duyduğuma çok sevindim! +5 XP kazandın!", chips: ["I like green", "Count to five", "Thank you"] },
@@ -1279,7 +1292,7 @@
       // 8. Hayvanlar
       else if (/\b(cat|cats|dog|dogs|owl|owls|bird|birds|lion|lions|fish)\b/.test(low)) {
         reply = pickRandom([
-          { en: "Animals are so cute! Owls say 'Hoot hoot!' +5 XP!", tr: "Hayvanlar çok sevimli! Baykuşlar 'Hu hu!' der. +5 XP!", chips: ["Cats say meow", "I like lions", "You are cute"] },
+          { en: "Animals are so cute! Owls say 'Hoot hoot!' +5 XP!", tr: "Hayvanlar çok sevimli! Papağanlar 'Hu hu!' der. +5 XP!", chips: ["Cats say meow", "I like lions", "You are cute"] },
           { en: "I love that animal too! Do you have a pet at home?", tr: "Ben de o hayvanı çok severim! Evde evcil hayvanın var mı?", chips: ["Yes, a cat", "No, I don't", "I want a dog"] }
         ]);
         state.xp += 5; saveState();
@@ -1314,7 +1327,7 @@
     function renderProfile() {
       document.getElementById('completedCount').innerText = state.completedUnits.length;
       document.getElementById('profileRank').innerText =
-        state.xp >= 100 ? "Seviye: Bilge Baykuş (A1)" : (state.xp >= 30 ? "Seviye: Hızlı Öğrenci (A0+)" : "Seviye: Başlangıç (A0)");
+        state.xp >= 100 ? "Seviye: Bilge Papağan (A1)" : (state.xp >= 30 ? "Seviye: Hızlı Öğrenci (A0+)" : "Seviye: Başlangıç (A0)");
 
       const badges = [
         { icon: "🌟", name: "İlk Adım", unlocked: state.completedUnits.length >= 1 },
@@ -1350,5 +1363,6 @@
   </script>
 </body>
 </html>
+
 
 
