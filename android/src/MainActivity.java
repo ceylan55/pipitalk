@@ -165,6 +165,7 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                 } else {
                     tts.setLanguage(Locale.US);
                 }
+                tts.setPitch(rate < 0.6f ? 1.20f : 1.32f);
                 tts.setSpeechRate(rate);
                 tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pipi_tts");
             }
