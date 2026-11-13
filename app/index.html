@@ -309,7 +309,7 @@
           <polygon points="50,14 43,24 57,24" fill="#F59E0B"/>
         </svg>
         <div class="pipi-bubble" id="pipiGreeting">
-          Merhaba! Ben <strong>Pipi</strong>. Her ünitede 5 soru var. Hadi başlayalım! 🦉✨
+          Merhaba! Ben <strong>Pipi</strong>. Tam <strong>50 Ünitelik</strong> büyük macera seni bekliyor! Hadi başlayalım! 🦉✨
         </div>
       </div>
 
@@ -355,7 +355,7 @@
         <div class="profile-name">Küçük Kaşif</div>
         <div class="profile-rank" id="profileRank">Seviye: Başlangıç (A0)</div>
         <div style="margin-top: 12px; font-size: 14px; color: var(--text-muted); font-weight: 700;">
-          Tamamlanan Ünite: <span id="completedCount">0</span> / 15
+          Tamamlanan Ünite: <span id="completedCount">0</span> / 50
         </div>
       </div>
 
@@ -420,254 +420,83 @@
   </div>
 
   <script>
-        // --- CURRICULUM DATA (3 Worlds x 5 Units = 15 Units + Dynamic Question Generator) ---
+            // --- CURRICULUM DATA (5 Worlds x 10 Units = 50 Units + Dynamic Question Generator) ---
     const WORLDS = [
       { id: 1, title: "Dünya 1: Keşif Vadisi", level: "A0", cls: "world-1", decor: ["🌲","🏞️","🌸","💧","🦆","🌳"] },
       { id: 2, title: "Dünya 2: Deniz & Adalar", level: "A1", cls: "world-2", decor: ["🏝️","⛵","🌊","🐚","🌴","🐬"] },
-      { id: 3, title: "Dünya 3: Bilge Zirve", level: "A1+", cls: "world-3", decor: ["🏔️","🎈","🌟","🏰","☁️","🦉"] }
+      { id: 3, title: "Dünya 3: Doğa & Macera", level: "A1+", cls: "world-1", decor: ["🏕️","🦁","🌈","🦊","🌻","🦋"] },
+      { id: 4, title: "Dünya 4: İletişim Şehri", level: "A2", cls: "world-2", decor: ["🏙️","🚀","🎭","🎡","🛸","🎈"] },
+      { id: 5, title: "Dünya 5: Bilge Zirve", level: "A2+", cls: "world-3", decor: ["🏔️","🌟","🏰","👑","🎓","🦉"] }
     ];
 
-    const UNITS = [
-      {
-        id: 1, world: 1, title: "Tanışma", sub: "Selamlaşma", icon: "👋",
-        vocab: [
-          { en: "Hello", tr: "Merhaba", em: "👋" },
-          { en: "Good morning", tr: "Günaydın", em: "☀️" },
-          { en: "Good night", tr: "İyi geceler", em: "🌙" },
-          { en: "Thank you", tr: "Teşekkürler", em: "🙏" },
-          { en: "Goodbye", tr: "Hoşça kal", em: "🚶" },
-          { en: "Please", tr: "Lütfen", em: "✨" },
-          { en: "Sorry", tr: "Özür dilerim", em: "😅" },
-          { en: "Welcome", tr: "Hoş geldin", em: "🤗" }
-        ],
-        sentences: [
-          { tr: "Benim adım Pipi", en: "My name is Pipi" },
-          { tr: "Nasılsın?", en: "How are you" },
-          { tr: "Ben iyiyim", en: "I am fine" },
-          { tr: "Tanıştığıma memnun oldum", en: "Nice to meet you" }
-        ]
-      },
-      {
-        id: 2, world: 1, title: "Renkler", sub: "Gökkuşağı", icon: "🎨",
-        vocab: [
-          { en: "Red", tr: "Kırmızı", em: "🔴" },
-          { en: "Blue", tr: "Mavi", em: "🔵" },
-          { en: "Green", tr: "Yeşil", em: "🟢" },
-          { en: "Yellow", tr: "Sarı", em: "🟡" },
-          { en: "Purple", tr: "Mor", em: "🟣" },
-          { en: "Orange", tr: "Turuncu", em: "🟠" },
-          { en: "Pink", tr: "Pembe", em: "🩷" },
-          { en: "White", tr: "Beyaz", em: "⚪" }
-        ],
-        sentences: [
-          { tr: "Yeşili severim", en: "I like green" },
-          { tr: "Gökyüzü mavidir", en: "The sky is blue" },
-          { tr: "Mor güzel", en: "Purple is nice" }
-        ]
-      },
-      {
-        id: 3, world: 1, title: "Sayılar", sub: "1'den 10'a", icon: "🔢",
-        vocab: [
-          { en: "One", tr: "1 (Bir)", em: "1️⃣" },
-          { en: "Two", tr: "2 (İki)", em: "2️⃣" },
-          { en: "Three", tr: "3 (Üç)", em: "3️⃣" },
-          { en: "Four", tr: "4 (Dört)", em: "4️⃣" },
-          { en: "Five", tr: "5 (Beş)", em: "5️⃣" },
-          { en: "Seven", tr: "7 (Yedi)", em: "7️⃣" },
-          { en: "Eight", tr: "8 (Sekiz)", em: "8️⃣" },
-          { en: "Ten", tr: "10 (On)", em: "🔟" }
-        ],
-        sentences: [
-          { tr: "İki elmam var", en: "I have two apples" },
-          { tr: "Üç kedi", en: "Three cats" },
-          { tr: "On yıldız", en: "Ten stars" }
-        ]
-      },
-      {
-        id: 4, world: 1, title: "Hayvanlar", sub: "Sevimli Dostlar", icon: "🐶",
-        vocab: [
-          { en: "Cat", tr: "Kedi", em: "🐱" },
-          { en: "Dog", tr: "Köpek", em: "🐶" },
-          { en: "Owl", tr: "Baykuş", em: "🦉" },
-          { en: "Bird", tr: "Kuş", em: "🐦" },
-          { en: "Lion", tr: "Aslan", em: "🦁" },
-          { en: "Fish", tr: "Balık", em: "🐟" },
-          { en: "Rabbit", tr: "Tavşan", em: "🐰" },
-          { en: "Monkey", tr: "Maymun", em: "🐵" }
-        ],
-        sentences: [
-          { tr: "Köpek mutlu", en: "The dog is happy" },
-          { tr: "Kedileri severim", en: "I like cats" },
-          { tr: "Kuş uçar", en: "The bird flies" }
-        ]
-      },
-      {
-        id: 5, world: 1, title: "Pipi Testi 1", sub: "Vadi Finali", icon: "👑", isBoss: true,
-        vocab: [
-          { en: "Friend", tr: "Arkadaş", em: "🤝" },
-          { en: "Amazing", tr: "Harika", em: "🌟" },
-          { en: "Star", tr: "Yıldız", em: "⭐" },
-          { en: "Forest", tr: "Orman", em: "🌲" },
-          { en: "Water", tr: "Su", em: "💧" },
-          { en: "Happy", tr: "Mutlu", em: "😄" }
-        ],
-        sentences: [
-          { tr: "Merhaba arkadaşım", en: "Hello my friend" },
-          { tr: "Pipi mor bir baykuş", en: "Pipi is a purple owl" },
-          { tr: "Sen harikasın", en: "You are amazing" }
-        ]
-      },
-      {
-        id: 6, world: 2, title: "Ailem", sub: "Ev ve Aile", icon: "🏠",
-        vocab: [
-          { en: "Mother", tr: "Anne", em: "👩" },
-          { en: "Father", tr: "Baba", em: "👨" },
-          { en: "Sister", tr: "Kız kardeş", em: "👧" },
-          { en: "Brother", tr: "Erkek kardeş", em: "👦" },
-          { en: "Home", tr: "Ev", em: "🏠" },
-          { en: "Family", tr: "Aile", em: "👨‍👩‍👧‍👦" }
-        ],
-        sentences: [
-          { tr: "Ailemi seviyorum", en: "I love my family" },
-          { tr: "Bu benim evim", en: "This is my home" }
-        ]
-      },
-      {
-        id: 7, world: 2, title: "Yiyecekler", sub: "Meyve & Sofra", icon: "🍎",
-        vocab: [
-          { en: "Apple", tr: "Elma", em: "🍎" },
-          { en: "Banana", tr: "Muz", em: "🍌" },
-          { en: "Bread", tr: "Ekmek", em: "🍞" },
-          { en: "Milk", tr: "Süt", em: "🥛" },
-          { en: "Cheese", tr: "Peynir", em: "🧀" },
-          { en: "Cake", tr: "Pasta", em: "🍰" }
-        ],
-        sentences: [
-          { tr: "Süt içerim", en: "I drink milk" },
-          { tr: "Kırmızı bir elma", en: "A red apple" }
-        ]
-      },
-      {
-        id: 8, world: 2, title: "Duygular", sub: "Nasıl Hissediyoruz?", icon: "😊",
-        vocab: [
-          { en: "Happy", tr: "Mutlu", em: "😄" },
-          { en: "Sad", tr: "Üzgün", em: "😢" },
-          { en: "Tired", tr: "Yorgun", em: "😴" },
-          { en: "Excited", tr: "Heyecanlı", em: "🤩" },
-          { en: "Hungry", tr: "Aç", em: "🍕" },
-          { en: "Brave", tr: "Cesur", em: "🦸" }
-        ],
-        sentences: [
-          { tr: "Ben çok mutluyum", en: "I am very happy" },
-          { tr: "O yorgun değil", en: "He is not tired" }
-        ]
-      },
-      {
-        id: 9, world: 2, title: "Meslekler", sub: "Kim Ne Yapar?", icon: "👩‍🏫",
-        vocab: [
-          { en: "Teacher", tr: "Öğretmen", em: "👩‍🏫" },
-          { en: "Doctor", tr: "Doktor", em: "👨‍⚕️" },
-          { en: "Pilot", tr: "Pilot", em: "👩‍✈️" },
-          { en: "Chef", tr: "Aşçı", em: "👨‍🍳" },
-          { en: "Artist", tr: "Ressam", em: "🎨" },
-          { en: "Farmer", tr: "Çiftçi", em: "🌾" }
-        ],
-        sentences: [
-          { tr: "Annem bir doktor", en: "My mother is a doctor" },
-          { tr: "Ben bir öğrenciyim", en: "I am a student" }
-        ]
-      },
-      {
-        id: 10, world: 2, title: "Ada Testi", sub: "Deniz Finali", icon: "🏆", isBoss: true,
-        vocab: [
-          { en: "Island", tr: "Ada", em: "🏝️" },
-          { en: "Sea", tr: "Deniz", em: "🌊" },
-          { en: "Boat", tr: "Tekne", em: "⛵" },
-          { en: "Sun", tr: "Güneş", em: "☀️" },
-          { en: "Shell", tr: "Deniz kabuğu", em: "🐚" },
-          { en: "Sand", tr: "Kum", em: "🏖️" }
-        ],
-        sentences: [
-          { tr: "Deniz mavidir", en: "The sea is blue" },
-          { tr: "Adada güneş var", en: "There is sun on the island" }
-        ]
-      },
-      {
-        id: 11, world: 3, title: "Hava & Giyim", sub: "Mevsimler", icon: "🧥",
-        vocab: [
-          { en: "Sunny", tr: "Güneşli", em: "☀️" },
-          { en: "Rainy", tr: "Yağmurlu", em: "🌧️" },
-          { en: "Snowy", tr: "Karlı", em: "❄️" },
-          { en: "Hat", tr: "Şapka", em: "👒" },
-          { en: "Coat", tr: "Mont", em: "🧥" },
-          { en: "Shoes", tr: "Ayakkabı", em: "👟" }
-        ],
-        sentences: [
-          { tr: "Bugün hava güneşli", en: "Today it is sunny" },
-          { tr: "Şapkamı takarım", en: "I wear my hat" }
-        ]
-      },
-      {
-        id: 12, world: 3, title: "Zaman & Günler", sub: "Saatler", icon: "⏰",
-        vocab: [
-          { en: "Today", tr: "Bugün", em: "📅" },
-          { en: "Tomorrow", tr: "Yarın", em: "🌅" },
-          { en: "Morning", tr: "Sabah", em: "🌄" },
-          { en: "Evening", tr: "Akşam", em: "🌆" },
-          { en: "Clock", tr: "Saat", em: "⏰" },
-          { en: "Week", tr: "Hafta", em: "🗓️" }
-        ],
-        sentences: [
-          { tr: "Yarın okula gidiyorum", en: "Tomorrow I go to school" },
-          { tr: "Saat kaç?", en: "What time is it" }
-        ]
-      },
-      {
-        id: 13, world: 3, title: "Ulaşım", sub: "Şehir & Yollar", icon: "🚀",
-        vocab: [
-          { en: "Car", tr: "Araba", em: "🚗" },
-          { en: "Bus", tr: "Otobüs", em: "🚌" },
-          { en: "Train", tr: "Tren", em: "🚂" },
-          { en: "Plane", tr: "Uçak", em: "✈️" },
-          { en: "Bike", tr: "Bisiklet", em: "🚲" },
-          { en: "Rocket", tr: "Roket", em: "🚀" }
-        ],
-        sentences: [
-          { tr: "Uçak çok hızlı", en: "The plane is very fast" },
-          { tr: "Bisikletim kırmızı", en: "My bike is red" }
-        ]
-      },
-      {
-        id: 14, world: 3, title: "Hareketler", sub: "Fiiller & Spor", icon: "⚽",
-        vocab: [
-          { en: "Run", tr: "Koşmak", em: "🏃" },
-          { en: "Jump", tr: "Zıplamak", em: "🦘" },
-          { en: "Read", tr: "Okumak", em: "📖" },
-          { en: "Sing", tr: "Şarkı söylemek", em: "🎤" },
-          { en: "Play", tr: "Oynamak", em: "⚽" },
-          { en: "Sleep", tr: "Uyumak", em: "😴" }
-        ],
-        sentences: [
-          { tr: "Ben hızlı koşarım", en: "I can run fast" },
-          { tr: "Kitap okumayı severim", en: "I like to read books" }
-        ]
-      },
-      {
-        id: 15, world: 3, title: "Büyük Şampiyona", sub: "Zirve Finali", icon: "🎓", isBoss: true,
-        vocab: [
-          { en: "Champion", tr: "Şampiyon", em: "🏆" },
-          { en: "Future", tr: "Gelecek", em: "🚀" },
-          { en: "Dream", tr: "Hayal", em: "💭" },
-          { en: "Smart", tr: "Akıllı", em: "🧠" },
-          { en: "World", tr: "Dünya", em: "🌍" },
-          { en: "Success", tr: "Başarı", em: "🎯" }
-        ],
-        sentences: [
-          { tr: "Ben akıllı bir kaşifim", en: "I am a smart explorer" },
-          { tr: "İngilizce konuşabiliyorum", en: "I can speak English" }
-        ]
-      }
+    const RAW_UNITS = [
+      // Dünya 1 (1-10)
+      [1, 1, "Tanışma", "Selamlaşma", "👋", [["Hello","Merhaba","👋"],["Good morning","Günaydın","☀️"],["Good night","İyi geceler","🌙"],["Thank you","Teşekkürler","🙏"],["Goodbye","Hoşça kal","🚶"]], [["Benim adım Pipi","My name is Pipi"],["Nasılsın?","How are you"]]],
+      [2, 1, "Renkler", "Gökkuşağı", "🎨", [["Red","Kırmızı","🔴"],["Blue","Mavi","🔵"],["Green","Yeşil","🟢"],["Yellow","Sarı","🟡"],["Purple","Mor","🟣"]], [["Yeşili severim","I like green"],["Gökyüzü mavidir","The sky is blue"]]],
+      [3, 1, "Sayılar 1-10", "Sayma", "🔢", [["One","Bir","1️⃣"],["Three","Üç","3️⃣"],["Five","Beş","5️⃣"],["Seven","Yedi","7️⃣"],["Ten","On","🔟"]], [["İki elmam var","I have two apples"],["Üç kedi","Three cats"]]],
+      [4, 1, "Hayvanlar", "Sevimli Dostlar", "🐶", [["Cat","Kedi","🐱"],["Dog","Köpek","🐶"],["Owl","Baykuş","🦉"],["Bird","Kuş","🐦"],["Lion","Aslan","🦁"]], [["Köpek mutlu","The dog is happy"],["Kedileri severim","I like cats"]]],
+      [5, 1, "Ailem", "Ev ve Aile", "🏠", [["Mother","Anne","👩"],["Father","Baba","👨"],["Sister","Kız kardeş","👧"],["Brother","Erkek kardeş","👦"],["Home","Ev","🏠"]], [["Ailemi seviyorum","I love my family"],["Bu benim evim","This is my home"]]],
+      [6, 1, "Meyveler", "Tatlı Sepet", "🍎", [["Apple","Elma","🍎"],["Banana","Muz","🍌"],["Orange","Portakal","🍊"],["Grape","Üzüm","🍇"],["Strawberry","Çilek","🍓"]], [["Kırmızı bir elma","A red apple"],["Muz severim","I like bananas"]]],
+      [7, 1, "Kıyafetler", "Dolabım", "👕", [["Shirt","Gömlek","👕"],["Hat","Şapka","👒"],["Shoes","Ayakkabı","👟"],["Coat","Mont","🧥"],["Dress","Elbise","👗"]], [["Şapkamı takarım","I wear my hat"],["Mavi ayakkabılar","Blue shoes"]]],
+      [8, 1, "Bedenim", "Hareket", "💪", [["Hand","El","✋"],["Eye","Göz","👁️"],["Ear","Kulak","👂"],["Nose","Burun","👃"],["Foot","Ayak","🦶"]], [["İki elim var","I have two hands"],["Gözlerimi açarım","I open my eyes"]]],
+      [9, 1, "Oyuncaklar", "Oyun Zamanı", "🧸", [["Ball","Top","⚽"],["Toy","Oyuncak","🧸"],["Kite","Uçurtma","🪁"],["Robot","Robot","🤖"],["Puzzle","Yapboz","🧩"]], [["Topum kırmızı","My ball is red"],["Oyun oynayalım","Let us play"]]],
+      [10, 1, "Vadi Testi", "Bölüm 1 Finali", "👑", [["Friend","Arkadaş","🤝"],["Star","Yıldız","⭐"],["Happy","Mutlu","😄"],["Smart","Akıllı","🧠"],["Winner","Kazanan","🏆"]], [["Merhaba arkadaşım","Hello my friend"],["Pipi mor bir baykuş","Pipi is a purple owl"]]],
+
+      // Dünya 2 (11-20)
+      [11, 2, "Kahvaltı", "Sabah Sofrası", "🍳", [["Bread","Ekmek","🍞"],["Milk","Süt","🥛"],["Cheese","Peynir","🧀"],["Egg","Yumurta","🥚"],["Honey","Bal","🍯"]], [["Süt içerim","I drink milk"],["Ekmek ve peynir","Bread and cheese"]]],
+      [12, 2, "Saatler", "Zaman", "⏰", [["Clock","Saat","⏰"],["Morning","Sabah","🌄"],["Night","Gece","🌃"],["Today","Bugün","📅"],["Tomorrow","Yarın","🌅"]], [["Saat kaç?","What time is it"],["Bugün okul var","Today is school"]]],
+      [13, 2, "Şehir", "Yerler", "🏙️", [["School","Okul","🏫"],["Park","Park","🏞️"],["Hospital","Hastane","🏥"],["Market","Market","🛒"],["Library","Kütüphane","📚"]], [["Okula gidiyorum","I go to school"],["Park büyük","The park is big"]]],
+      [14, 2, "Duygular", "Nasıl Hissettik?", "😊", [["Happy","Mutlu","😄"],["Sad","Üzgün","😢"],["Tired","Yorgun","😴"],["Excited","Heyecanlı","🤩"],["Brave","Cesur","🦸"]], [["Ben çok mutluyum","I am very happy"],["O yorgun değil","He is not tired"]]],
+      [15, 2, "Meslekler", "İşler", "👩‍🏫", [["Teacher","Öğretmen","👩‍🏫"],["Doctor","Doktor","👨‍⚕️"],["Pilot","Pilot","👩‍✈️"],["Chef","Aşçı","👨‍🍳"],["Farmer","Çiftçi","🌾"]], [["Annem bir doktor","My mother is a doctor"],["Ben bir öğrenciyim","I am a student"]]],
+      [16, 2, "Mevsimler", "Takvim", "🌸", [["Spring","İlkbahar","🌸"],["Summer","Yaz","☀️"],["Autumn","Sonbahar","🍂"],["Winter","Kış","❄️"],["Week","Hafta","🗓️"]], [["Yazı severim","I like summer"],["Kışın kar yağar","It snows in winter"]]],
+      [17, 2, "Alışveriş", "Market", "🛍️", [["Bag","Çanta","👜"],["Money","Para","💵"],["Price","Fiyat","🏷️"],["Buy","Satın almak","🛒"],["Shop","Dükkan","🏪"]], [["Ne kadar?","How much is it"],["Yeni bir çanta","A new bag"]]],
+      [18, 2, "Ulaşım", "Araçlar", "🚀", [["Car","Araba","🚗"],["Bus","Otobüs","🚌"],["Train","Tren","🚂"],["Plane","Uçak","✈️"],["Bike","Bisiklet","🚲"]], [["Uçak çok hızlı","The plane is very fast"],["Bisikletim kırmızı","My bike is red"]]],
+      [19, 2, "Ev İşleri", "Yardım", "🧹", [["Clean","Temiz","✨"],["Room","Oda","🛏️"],["Help","Yardım","🤝"],["Wash","Yıkamak","🧼"],["Cook","Pişirmek","🍲"]], [["Odamı temizlerim","I clean my room"],["Sana yardım edebilirim","I can help you"]]],
+      [20, 2, "Ada Testi", "Bölüm 2 Finali", "🏆", [["Island","Ada","🏝️"],["Sea","Deniz","🌊"],["Boat","Tekne","⛵"],["Shell","Deniz kabuğu","🐚"],["Sand","Kum","🏖️"]], [["Deniz mavidir","The sea is blue"],["Adada güneş var","There is sun on the island"]]],
+
+      // Dünya 3 (21-30)
+      [21, 3, "Vahşi Doğa", "Orman", "🦁", [["Tiger","Kaplan","🐯"],["Elephant","Fil","🐘"],["Monkey","Maymun","🐵"],["Bear","Ayı","🐻"],["Wolf","Kurt","🐺"]], [["Fil çok büyük","The elephant is very big"],["Aslan hızlı koşar","The lion runs fast"]]],
+      [22, 3, "Deniz Altı", "Okyanus", "🐬", [["Fish","Balık","🐟"],["Dolphin","Yunus","🐬"],["Whale","Balina","🐋"],["Octopus","Ahtapot","🐙"],["Shark","Köpekbalığı","🦈"]], [["Yunuslar akıllıdır","Dolphins are smart"],["Balina okyanusta yaşar","Whales live in ocean"]]],
+      [23, 3, "Sporlar", "Sağlıklı Yaşam", "⚽", [["Run","Koşmak","🏃"],["Jump","Zıplamak","🦘"],["Swim","Yüzmek","🏊"],["Football","Futbol","⚽"],["Tennis","Tenis","🎾"]], [["Ben hızlı koşarım","I can run fast"],["Futbol oynamayı severim","I like to play football"]]],
+      [24, 3, "Hobiler", "Sanat & Müzik", "🎸", [["Music","Müzik","🎵"],["Guitar","Gitar","🎸"],["Paint","Boyamak","🎨"],["Sing","Şarkı söylemek","🎤"],["Dance","Dans etmek","💃"]], [["Gitar çalarım","I play the guitar"],["Resim yapmayı severim","I like painting"]]],
+      [25, 3, "Doğum Günü", "Kutlama", "🎂", [["Cake","Pasta","🎂"],["Gift","Hediye","🎁"],["Candle","Mum","🕯️"],["Balloon","Balon","🎈"],["Party","Parti","🎉"]], [["İyi ki doğdun","Happy birthday to you"],["Bu senin hediyen","This is your gift"]]],
+      [26, 3, "Kamp", "Doğa Gezisi", "⛺", [["Tent","Çadır","⛺"],["Fire","Ateş","🔥"],["Mountain","Dağ","🏔️"],["River","Nehir","🏞️"],["Map","Harita","🗺️"]], [["Çadır kurarız","We set up a tent"],["Haritaya bak","Look at the map"]]],
+      [27, 3, "Uzay", "Gezegenler", "🚀", [["Space","Uzay","🌌"],["Planet","Gezegen","🪐"],["Moon","Ay","🌕"],["Rocket","Roket","🚀"],["Astronaut","Astronot","👨‍🚀"]], [["Uzaya uçarız","We fly to space"],["Ay gece parlar","The moon shines at night"]]],
+      [28, 3, "Çiftlik", "Köy Hayatı", "🚜", [["Cow","İnek","🐄"],["Horse","At","🐴"],["Sheep","Koyun","🐑"],["Chicken","Tavuk","🐔"],["Tractor","Traktör","🚜"]], [["At çok hızlı","The horse is very fast"],["Çiftlikte inekler var","There are cows on the farm"]]],
+      [29, 3, "Bilim Kulübü", "Deneyler", "🔬", [["Science","Bilim","🔬"],["Experiment","Deney","🧪"],["Water","Su","💧"],["Light","Işık","💡"],["Magnet","Mıknatıs","🧲"]], [["Neden ve nasıl?","Why and how"],["Bilim çok eğlenceli","Science is very fun"]]],
+      [30, 3, "Doğa Kaşifi", "Bölüm 3 Finali", "🧭", [["Compass","Pusula","🧭"],["Explorer","Kaşif","🥾"],["Forest","Orman","🌲"],["Adventure","Macera","🗺️"],["Nature","Doğa","🌿"]], [["Doğayı seviyoruz","We love nature"],["Ben bir kaşifim","I am an explorer"]]],
+
+      // Dünya 4 (31-40)
+      [31, 4, "Restoran", "Sipariş", "🍽️", [["Menu","Menü","📜"],["Soup","Çorba","🍲"],["Pizza","Pizza","🍕"],["Water","Su","💧"],["Waiter","Garson","🤵"]], [["Bir pizza lütfen","One pizza please"],["Afiyet olsun","Enjoy your meal"]]],
+      [32, 4, "Sağlık", "Doktorda", "🩺", [["Doctor","Doktor","👨‍⚕️"],["Medicine","İlaç","💊"],["Healthy","Sağlıklı","🥗"],["Sleep","Uyku","😴"],["Smile","Gülümseme","😊"]], [["Erken uyumalıyız","We should sleep early"],["Su içmek sağlıklıdır","Drinking water is healthy"]]],
+      [33, 4, "Kayıp Eşya", "Tarif Etme", "🔍", [["Key","Anahtar","🔑"],["Glasses","Gözlük","👓"],["Watch","Kol saati","⌚"],["Umbrella","Şemsiye","☂️"],["Wallet","Cüzdan","👛"]], [["Anahtarımı bulamıyorum","I cannot find my key"],["Gözlüğüm masada","My glasses are on table"]]],
+      [34, 4, "Tatil", "Seyahat", "✈️", [["Ticket","Bilet","🎫"],["Hotel","Otel","🏨"],["Beach","Plaj","🏖️"],["Camera","Kamera","📷"],["Passport","Pasaport","📘"]], [["Tatile gidiyoruz","We are going on holiday"],["Fotoğraf çekelim","Let us take a photo"]]],
+      [35, 4, "Masallar", "Hikayeler", "📖", [["Story","Hikaye","📖"],["King","Kral","👑"],["Castle","Kale","🏰"],["Dragon","Ejderha","🐉"],["Magic","Sihir","✨"]], [["Bir zamanlar","Once upon a time"],["Kitap okumayı severim","I like to read books"]]],
+      [36, 4, "Çevre Dostu", "Gezegenimiz", "🌍", [["Recycle","Geri dönüşüm","♻️"],["Earth","Dünya","🌍"],["Tree","Ağaç","🌳"],["Clean","Temiz","✨"],["Save","Korumak","🛡️"]], [["Dünyamızı koruyalım","Let us save our planet"],["Ağaç dikelim","Let us plant trees"]]],
+      [37, 4, "Telefon", "İletişim", "📱", [["Phone","Telefon","📱"],["Call","Aramak","📞"],["Message","Mesaj","💬"],["Voice","Ses","🎙️"],["Answer","Cevap","📩"]], [["Seni sonra arayacağım","I will call you later"],["Bana mesaj at","Send me a message"]]],
+      [38, 4, "Alışveriş Merkezi", "Seçimler", "🏬", [["Jacket","Ceket","🧥"],["Size","Beden","📏"],["Small","Küçük","🤏"],["Large","Büyük","🙌"],["Color","Renk","🎨"]], [["Bunu deneyebilir miyim","Can I try this on"],["Büyük beden lütfen","Large size please"]]],
+      [39, 4, "Buluşlar", "Mucitler", "💡", [["Invention","Buluş","💡"],["Computer","Bilgisayar","💻"],["Internet","İnternet","🌐"],["Robot","Robot","🤖"],["Engine","Motor","⚙️"]], [["Geleceği inşa et","Build the future"],["Teknoloji hayatı kolaylaştırır","Tech makes life easy"]]],
+      [40, 4, "Şehir Testi", "Bölüm 4 Finali", "🏙️", [["City","Şehir","🏙️"],["Bridge","Köprü","🌉"],["People","İnsanlar","👥"],["Question","Soru","❓"],["Answer","Cevap","✅"]], [["Şehirde buluşalım","Let us meet in city"],["Soruyu cevapladım","I answered the question"]]],
+
+      // Dünya 5 (41-50)
+      [41, 5, "Dünya Kültürleri", "Ülkeler", "🗺️", [["Country","Ülke","🏳️"],["Flag","Bayrak","🚩"],["Language","Dil","🗣️"],["Culture","Kültür","🎭"],["Travel","Seyahat","🧳"]], [["Türkiye çok güzel","Turkey is very beautiful"],["Yeni diller öğreniyorum","I learn new languages"]]],
+      [42, 5, "Gelecek", "Teknoloji", "🤖", [["Future","Gelecek","🚀"],["Smart","Akıllı","🧠"],["Flying car","Uçan araba","🛸"],["Energy","Enerji","⚡"],["Mars","Mars","🔴"]], [["Gelecek çok parlak","The future is bright"],["Akıllı şehirler kuruyoruz","We build smart cities"]]],
+      [43, 5, "Fikirler", "Düşünce", "💭", [["Think","Düşünmek","💭"],["Idea","Fikir","💡"],["Because","Çünkü","🔗"],["Agree","Katılmak","🤝"],["Reason","Sebep","📌"]], [["Bence bu harika","I think this is great"],["İyi bir fikrim var","I have a good idea"]]],
+      [44, 5, "Dedektif", "Gizem", "🕵️", [["Clue","İpucu","🔍"],["Mystery","Gizem","🕵️"],["Secret","Sır","🤫"],["Find","Bulmak","🎯"],["Solve","Çözmek","🧩"]], [["Gizemi çözelim","Let us solve the mystery"],["İpucunu buldum","I found the clue"]]],
+      [45, 5, "Yaratıcılık", "Sanat", "🎭", [["Art","Sanat","🎨"],["Theater","Tiyatro","🎭"],["Poem","Şiir","✍️"],["Design","Tasarım","📐"],["Create","Yaratmak","✨"]], [["Yeni şeyler tasarlarız","We design new things"],["Sanat ruhu besler","Art feeds the soul"]]],
+      [46, 5, "Dostluk", "Empati", "💖", [["Kind","Nazik","🌸"],["Share","Paylaşmak","🤲"],["Respect","Saygı","🙏"],["Trust","Güven","🛡️"],["Together","Birlikte","👫"]], [["Birlikte daha güçlüyüz","Together we are stronger"],["Her zaman nazik ol","Always be kind"]]],
+      [47, 5, "Bilim Kurgu", "Hayal Gücü", "🛸", [["Galaxy","Galaksi","🌌"],["Time","Zaman","⏳"],["Portal","Geçit","🌀"],["Starship","Yıldız gemisi","🛸"],["Hero","Kahraman","🦸"]], [["Galaksiyi keşfet","Explore the galaxy"],["Her şey mümkün","Everything is possible"]]],
+      [48, 5, "Münazara", "Tartışma", "🎙️", [["Opinion","Görüş","🗣️"],["True","Doğru","✅"],["False","Yanlış","❌"],["Better","Daha iyi","📈"],["Listen","Dinlemek","👂"]], [["Senin fikrin ne?","What is your opinion"],["Seni dikkatle dinliyorum","I listen to you carefully"]]],
+      [49, 5, "Başarı Hikayem", "Gurur", "🌟", [["Success","Başarı","🎯"],["Proud","Gururlu","🦁"],["Goal","Hedef","🏁"],["Journey","Yolculuk","🛤️"],["Dream","Hayal","💭"]], [["Hedefime ulaştım","I reached my goal"],["Kendimle gurur duyuyorum","I am proud of myself"]]],
+      [50, 5, "Büyük Mezuniyet", "Zirve Şampiyonu", "🎓", [["Champion","Şampiyon","🏆"],["Master","Usta","🎓"],["Crown","Taç","👑"],["Legend","Efsane","🌟"],["Victory","Zafer","🎉"]], [["Ben bir şampiyonum","I am a champion"],["İngilizce konuşabiliyorum","I can speak English"]]]
     ];
+
+    const UNITS = RAW_UNITS.map(u => ({
+      id: u[0], world: u[1], title: u[2], sub: u[3], icon: u[4],
+      isBoss: (u[0] % 10 === 0),
+      vocab: u[5].map(v => ({ en: v[0], tr: v[1], em: v[2] })),
+      sentences: u[6].map(s => ({ tr: s[0], en: s[1] }))
+    }));
 
     function shuffleArr(arr) {
       const a = arr.slice();
@@ -1381,4 +1210,5 @@
   </script>
 </body>
 </html>
+
 
