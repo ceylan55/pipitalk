@@ -186,7 +186,14 @@
     .msg { max-width: 85%; padding: 12px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; }
     .msg.pipi { align-self: flex-start; background: #EDE9FE; color: #1E1B4B; border-bottom-left-radius: 4px; }
     .msg.user { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
-    .msg-tr { font-size: 12px; color: #6D28D9; margin-top: 4px; font-weight: 600; }
+    .msg-tr { font-size: 12px; color: #475569; margin-top: 4px; font-weight: 600; }
+    .msg.user .msg-tr { color: #E2E8F0; font-weight: 500; }
+    .lang-switch { display: flex; gap: 8px; margin-bottom: 10px; }
+    .lang-pill {
+      flex: 1; text-align: center; padding: 8px 10px; border-radius: 12px; font-size: 12px; font-weight: 800;
+      background: #fff; border: 2px solid var(--border); color: var(--text-muted); cursor: pointer;
+    }
+    .lang-pill.active { background: #EDE9FE; border-color: var(--primary); color: var(--primary); }
     .msg-speak {
       display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 800;
       color: var(--primary); cursor: pointer; background: #fff; padding: 3px 8px; border-radius: 8px;
@@ -302,9 +309,14 @@
       <div class="chat-box" id="chatBox"></div>
       <div class="quick-replies" id="quickReplies"></div>
 
+      <div class="lang-switch">
+        <div class="lang-pill active" id="langEnBtn" onclick="setSpeechLang('en-US')">🇬🇧 İngilizce Konuş</div>
+        <div class="lang-pill" id="langTrBtn" onclick="setSpeechLang('tr-TR')">🇹🇷 Türkçe Konuş (Çevir)</div>
+      </div>
+
       <div class="chat-input-row">
         <button class="mic-btn" id="micBtn" onclick="startMic()" title="Sesli Konuş">🎤</button>
-        <input type="text" id="chatInput" class="chat-input" placeholder="İngilizce yaz veya mikrofona bas...">
+        <input type="text" id="chatInput" class="chat-input" placeholder="İngilizce veya Türkçe yaz / konuş...">
         <button class="send-btn" onclick="sendChat()">Gönder</button>
       </div>
     </div>
@@ -792,18 +804,81 @@
       speakWord(en);
     }
 
-    function addUserMessage(text) {
+    let speechLang = 'en-US';
+
+    function setSpeechLang(lang) {
+      speechLang = lang;
+      document.getElementById('langEnBtn').classList.toggle('active', lang === 'en-US');
+      document.getElementById('langTrBtn').classList.toggle('active', lang === 'tr-TR');
+      const inp = document.getElementById('chatInput');
+      inp.placeholder = lang === 'tr-TR' ? 'Türkçe söyle veya yaz (İngilizceye çevireyim)...' : 'İngilizce yaz veya mikrofona bas...';
+    }
+
+    function looksTurkish(str) {
+      if (speechLang === 'tr-TR') return true;
+      if (/[çğıöşüÇĞİÖŞÜ]/.test(str)) return true;
+      return /\b(benim|adım|merhaba|selam|nasılsın|günaydın|kedi|köpek|mavi|kırmızı|yeşil|sarı|elma|teşekkür|severim|mutluyum|evet|hayır|nedir|nasıl|bugün)\b/i.test(str);
+    }
+
+    async function translateText(text, from, to) {
+      try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
+        const data = await res.json();
+        if (data && data.responseData && data.responseData.translatedText) {
+          return data.responseData.translatedText;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function addUserMessage(text, trText) {
       const box = document.getElementById('chatBox');
       const div = document.createElement('div');
       div.className = 'msg user';
-      div.innerText = text;
+      const id = 'umsg_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      div.innerHTML = `<div>${text}</div><div class="msg-tr" id="${id}">${trText || ''}</div>`;
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
+      return id;
     }
 
     function sendQuick(text) {
-      addUserMessage(text);
+      const msgId = addUserMessage(text, 'Çevirisi yükleniyor...');
+      translateText(text, 'en', 'tr').then(tr => {
+        const el = document.getElementById(msgId);
+        if (el) el.innerText = tr ? ('🇹🇷 ' + tr) : '';
+      });
       generateAiReply(text);
+    }
+
+    async function handleUserTurn(rawText, isVoice) {
+      const clean = rawText.trim();
+      if (!clean) return;
+      const prefix = isVoice ? '🎤 ' : '';
+
+      if (looksTurkish(clean)) {
+        const msgId = addUserMessage(prefix + clean, 'İngilizceye çevriliyor...');
+        const enTrans = await translateText(clean, 'tr', 'en');
+        const el = document.getElementById(msgId);
+        if (enTrans) {
+          if (el) el.innerText = '🇬🇧 ' + enTrans;
+          addAiMessage(`In English: "${enTrans}"`, `Türkçesi: "${clean}" (+5 XP!)`);
+          state.xp += 5; saveState();
+          speakWord(enTrans);
+          return;
+        } else {
+          if (el) el.innerText = '';
+          generateAiReply(clean);
+          return;
+        }
+      } else {
+        const msgId = addUserMessage(prefix + clean, '');
+        translateText(clean, 'en', 'tr').then(tr => {
+          const el = document.getElementById(msgId);
+          if (el && tr) el.innerText = '🇹🇷 ' + tr;
+        });
+        generateAiReply(clean);
+      }
     }
 
     function sendChat() {
@@ -811,8 +886,7 @@
       const val = inp.value.trim();
       if (!val) return;
       inp.value = '';
-      addUserMessage(val);
-      generateAiReply(val);
+      handleUserTurn(val, false);
     }
 
     window.onMicState = function(isListening) {
@@ -821,18 +895,17 @@
       if (isListening) {
         btn.classList.add('listening');
         btn.innerText = '🔴';
-        inp.placeholder = 'Dinliyorum... İngilizce konuş!';
+        inp.placeholder = speechLang === 'tr-TR' ? 'Dinliyorum... Türkçe konuş!' : 'Dinliyorum... İngilizce konuş!';
       } else {
         btn.classList.remove('listening');
         btn.innerText = '🎤';
-        inp.placeholder = 'İngilizce yaz veya mikrofona bas...';
+        inp.placeholder = speechLang === 'tr-TR' ? 'Türkçe söyle veya yaz...' : 'İngilizce yaz veya mikrofona bas...';
       }
     };
 
     window.onMicResult = function(text) {
       if (!text) return;
-      addUserMessage('🎤 ' + text);
-      generateAiReply(text);
+      handleUserTurn(text, true);
     };
 
     window.onMicError = function(err) {
@@ -841,6 +914,10 @@
     };
 
     function startMic() {
+      if (window.PipiBridge && window.PipiBridge.startListeningLang) {
+        window.PipiBridge.startListeningLang(speechLang);
+        return;
+      }
       if (window.PipiBridge && window.PipiBridge.startListening) {
         window.PipiBridge.startListening();
         return;
@@ -851,7 +928,7 @@
         return;
       }
       const rec = new SR();
-      rec.lang = 'en-US';
+      rec.lang = speechLang;
       rec.interimResults = false;
       window.onMicState(true);
       rec.onresult = (e) => {
