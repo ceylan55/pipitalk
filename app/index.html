@@ -806,24 +806,132 @@
       generateAiReply(val);
     }
 
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function isGibberish(str) {
+      const clean = str.trim().toLowerCase();
+      if (clean.length < 2) return true;
+      if (/^[0-9\W_]+$/.test(clean)) return true; // Sadece sayı veya sembol
+      if (/(.)\1{2,}/.test(clean)) return true; // Aynı harf 3+ kez tekrar (aaa, zzz)
+      const words = clean.split(/\s+/).filter(Boolean);
+      const validShort = new Set(["hi", "ok", "no", "go", "me", "my", "is", "am", "do", "to", "in", "on"]);
+      // Sesli harf içermeyen uzun kelimeler veya rastgele klavye vuruşları
+      for (const w of words) {
+        const letters = w.replace(/[^a-zçğıöşü]/g, '');
+        if (letters.length === 0) return true;
+        if (letters.length <= 2 && !validShort.has(letters)) return true;
+        if (letters.length >= 3 && !/[aeiouyöüıi]/.test(letters)) return true;
+        if (/[bcdfghjklmnpqrstvwxz]{5,}/.test(letters)) return true;
+      }
+      return false;
+    }
+
+    function updateQuickChips(chips) {
+      const qr = document.getElementById('quickReplies');
+      qr.innerHTML = chips.map(c => `<div class="quick-chip" onclick="sendQuick('${c.replace(/'/g, "\\'")}')">${c}</div>`).join('');
+    }
+
     function generateAiReply(input) {
-      const low = input.toLowerCase();
-      let en = "Awesome! Keep practicing English with me!", tr = "Harika! Benimle İngilizce pratik yapmaya devam et!";
-      if (low.includes("name")) {
-        en = "Nice to meet you! You speak great English!"; tr = "Tanıştığımıza memnun oldum! Çok güzel İngilizce konuşuyorsun!";
-      } else if (low.includes("hello") || low.includes("hi")) {
-        en = "Hello friend! How are you today?"; tr = "Merhaba dostum! Bugün nasılsın?";
-      } else if (low.includes("how are you")) {
-        en = "I am super happy! And how are you?"; tr = "Ben süper mutluyum! Peki sen nasılsın?";
-      } else if (low.includes("blue") || low.includes("red") || low.includes("yellow") || low.includes("green")) {
-        en = "That is a beautiful color! Can you count to five in English?"; tr = "Çok güzel bir renk! İngilizce beşe kadar sayabilir misin?";
-      } else if (low.includes("cat") || low.includes("dog") || low.includes("owl")) {
-        en = "Animals are amazing! I am a friendly owl."; tr = "Hayvanlar harikadır! Ben de arkadaş canlısı bir baykuşum.";
-      } else if (low.includes("happy") || low.includes("great") || low.includes("good")) {
-        en = "Yay! That makes me happy too! +5 XP for speaking!"; tr = "Yaşasın! Bu beni de mutlu etti! Konuştuğun için +5 XP!";
+      const low = input.trim().toLowerCase();
+      let reply = null;
+
+      // 1. Anlamsız / rastgele girdi kontrolü
+      if (isGibberish(low)) {
+        reply = pickRandom([
+          { en: "Hoot? I didn't understand that. Can you try an English word like 'Hello' or 'Red'?", tr: "Hu? Bunu anlayamadım. 'Hello' veya 'Red' gibi bir İngilizce kelime dener misin?", chips: ["Hello Pipi!", "I like red", "How are you?"] },
+          { en: "Oops! That looks a little confusing. Let's say 'My name is ...' together!", tr: "Eyvah, bu biraz karışık görünüyor. Hadi birlikte 'My name is ...' diyelim!", chips: ["My name is Ali", "I am happy", "Goodbye"] },
+          { en: "Hmm, I'm still learning! Could you write a short English sentence?", tr: "Hımm, bunu çözemedim! Kısa bir İngilizce cümle yazabilir misin?", chips: ["I like cats", "Good morning", "Thank you"] }
+        ]);
+      }
+      // 2. Türkçe kelime yakalama (öğretici düzeltme)
+      else if (/\b(merhaba|selam|günaydın|nasılsın|kedi|köpek|mavi|kırmızı|yeşil|sarı|elma|teşekkür)\b/.test(low)) {
+        if (low.includes("merhaba") || low.includes("selam")) {
+          reply = { en: "In English we say 'Hello!' Try typing 'Hello Pipi!'", tr: "İngilizcede buna 'Hello!' deriz. Hadi 'Hello Pipi!' yaz!", chips: ["Hello Pipi!", "Good morning"] };
+        } else if (low.includes("nasılsın")) {
+          reply = { en: "You can ask 'How are you?' in English! I am great, thanks!", tr: "İngilizcede 'How are you?' diye sorabilirsin! Ben harikayım, teşekkürler!", chips: ["How are you?", "I am good"] };
+        } else if (low.includes("kedi") || low.includes("köpek")) {
+          reply = { en: "Cat is 'Kedi' and Dog is 'Köpek'! Which one do you like?", tr: "Kedi = Cat, Köpek = Dog! Hangisini daha çok seversin?", chips: ["I like cats", "I like dogs"] };
+        } else {
+          reply = { en: "Try saying that in English! For example: 'Red', 'Blue', or 'Thank you'.", tr: "Bunu İngilizce söylemeyi dene! Örneğin: 'Red', 'Blue' veya 'Thank you'.", chips: ["Red", "Blue", "Thank you"] };
+        }
+      }
+      // 3. Selamlaşma
+      else if (/\b(hello|hi|hey|good morning|good evening|good night)\b/.test(low)) {
+        reply = pickRandom([
+          { en: "Hello friend! What is your favorite color?", tr: "Merhaba dostum! En sevdiğin renk nedir?", chips: ["I like blue", "I like purple", "Red is nice"] },
+          { en: "Hi there! How are you feeling today?", tr: "Selam! Bugün kendini nasıl hissediyorsun?", chips: ["I am happy!", "I am great!", "I am tired"] },
+          { en: "Hoot hoot! Nice to see you! Do you like animals?", tr: "Hu hu! Seni gördüğüme sevindim! Hayvanları sever misin?", chips: ["I like cats", "I like owls", "Yes, I do!"] }
+        ]);
+      }
+      // 4. Hal hatır
+      else if (low.includes("how are you")) {
+        reply = pickRandom([
+          { en: "I am flying high and feeling great! How about you?", tr: "Yükseklerde uçuyorum ve harika hissediyorum! Ya sen?", chips: ["I am happy", "I am good", "Me too!"] },
+          { en: "I am super happy today! What is your name?", tr: "Bugün süper mutluyum! Senin adın ne?", chips: ["My name is Ali", "My name is Zehra"] }
+        ]);
+      }
+      // 5. İsim tanıtma
+      else if (low.includes("name") || /\b(i am|i'm)\b/.test(low) && !low.includes("happy") && !low.includes("sad") && !low.includes("good") && !low.includes("great") && !low.includes("tired")) {
+        reply = pickRandom([
+          { en: "Nice to meet you! That is a lovely name. +5 XP!", tr: "Tanıştığımıza memnun oldum! Çok güzel bir isim. +5 XP!", chips: ["Thank you!", "How are you?", "I like blue"] },
+          { en: "Welcome! I am Pipi the Owl. What animal do you like?", tr: "Hoş geldin! Ben Baykuş Pipi. Hangi hayvanı seversin?", chips: ["I like lions", "I like dogs", "I like birds"] }
+        ]);
         state.xp += 5; saveState();
       }
-      setTimeout(() => addAiMessage(en, tr), 350);
+      // 6. Duygular
+      else if (/\b(happy|great|good|fine|amazing|super|sad|tired)\b/.test(low)) {
+        if (low.includes("sad") || low.includes("tired")) {
+          reply = { en: "Oh no! Sending you a big owl hug! Let's play a fun game.", tr: "Ah, kıyamam! Sana kocaman bir baykuş sarılması! Hadi eğlenceli bir oyun oynayalım.", chips: ["Thank you Pipi", "I am happy now"] };
+        } else {
+          reply = pickRandom([
+            { en: "Yay! I love hearing that! +5 XP for your positive energy!", tr: "Yaşasın! Bunu duyduğuma çok sevindim! +5 XP kazandın!", chips: ["I like green", "Count to five", "Thank you"] },
+            { en: "Awesome! Can you tell me your favorite animal?", tr: "Müthiş! Bana en sevdiğin hayvanı söyleyebilir misin?", chips: ["Cat", "Dog", "Lion"] }
+          ]);
+          state.xp += 5; saveState();
+        }
+      }
+      // 7. Renkler
+      else if (/\b(red|blue|green|yellow|purple|orange|pink|black|white)\b/.test(low)) {
+        reply = pickRandom([
+          { en: "Ooh, that is a wonderful color! My feathers are purple. +5 XP!", tr: "Oo, harika bir renk! Benim tüylerim de mor. +5 XP!", chips: ["Purple is nice", "I like yellow", "I have two apples"] },
+          { en: "Great choice! Can you count from one to three in English?", tr: "Harika seçim! İngilizce birden üçe kadar sayabilir misin?", chips: ["One, two, three", "Five!", "Ten!"] }
+        ]);
+        state.xp += 5; saveState();
+      }
+      // 8. Hayvanlar
+      else if (/\b(cat|cats|dog|dogs|owl|owls|bird|birds|lion|lions|fish)\b/.test(low)) {
+        reply = pickRandom([
+          { en: "Animals are so cute! Owls say 'Hoot hoot!' +5 XP!", tr: "Hayvanlar çok sevimli! Baykuşlar 'Hu hu!' der. +5 XP!", chips: ["Cats say meow", "I like lions", "You are cute"] },
+          { en: "I love that animal too! Do you have a pet at home?", tr: "Ben de o hayvanı çok severim! Evde evcil hayvanın var mı?", chips: ["Yes, a cat", "No, I don't", "I want a dog"] }
+        ]);
+        state.xp += 5; saveState();
+      }
+      // 9. Sayılar
+      else if (/\b(one|two|three|four|five|six|seven|eight|nine|ten)\b/.test(low)) {
+        reply = { en: "Great counting! Numbers are super fun. +5 XP!", tr: "Harika saydın! Sayılar çok eğlenceli. +5 XP!", chips: ["I have two apples", "Ten!", "Thank you"] };
+        state.xp += 5; saveState();
+      }
+      // 10. Teşekkür / Veda
+      else if (/\b(thank|thanks|bye|goodbye|see you)\b/.test(low)) {
+        reply = low.includes("bye")
+          ? { en: "Goodbye friend! Come back soon to practice!", tr: "Görüşürüz dostum! Pratik yapmak için yakında yine gel!", chips: ["Hello Pipi!", "See you!"] }
+          : { en: "You are very welcome! You are doing great!", tr: "Rica ederim! Çok iyi gidiyorsun!", chips: ["I am happy", "Let's talk more"] };
+      }
+      // 11. Diğer geçerli ama listede olmayan İngilizce cümleler
+      else {
+        reply = pickRandom([
+          { en: "Interesting! Can you tell me more using simple English words?", tr: "İlginç! Basit İngilizce kelimelerle biraz daha anlatır mısın?", chips: ["I like apples", "I am happy", "Blue"] },
+          { en: "Nice try! Let's practice colors or animals together.", tr: "Güzel deneme! Hadi birlikte renkler veya hayvanlar çalışalım.", chips: ["I like red", "Cat", "One, two, three"] },
+          { en: "Good effort! Remember, you can ask me 'How are you?' anytime.", tr: "Güzel çaba! Bana her zaman 'How are you?' diye sorabilirsin.", chips: ["How are you?", "What is your name?"] }
+        ]);
+      }
+
+      setTimeout(() => {
+        addAiMessage(reply.en, reply.tr);
+        if (reply.chips) updateQuickChips(reply.chips);
+      }, 350);
     }
 
     // --- PROFILE & TABS ---
