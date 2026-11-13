@@ -1,7 +1,14 @@
 package com.ceylan.pipitalk;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
@@ -12,6 +19,7 @@ import android.webkit.WebViewClient;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends Activity implements TextToSpeech.OnInitListener {
@@ -19,6 +27,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
     private WebView webView;
     private TextToSpeech tts;
     private boolean ttsReady = false;
+    private SpeechRecognizer speechRecognizer;
+    private static final int REQ_AUDIO_PERMISSION = 2001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +62,12 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
         });
 
         webView.loadUrl("file:///android_asset/index.html");
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQ_AUDIO_PERMISSION);
+            }
+        }
     }
 
     @Override
@@ -63,12 +79,78 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
         }
     }
 
+    private void evalJs(final String js) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (webView != null) {
+                    webView.evaluateJavascript(js, null);
+                }
+            }
+        });
+    }
+
+    private void startNativeListening() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQ_AUDIO_PERMISSION);
+                    return;
+                }
+                if (!SpeechRecognizer.isRecognitionAvailable(MainActivity.this)) {
+                    evalJs("window.onMicError && window.onMicError('Konuşma tanıma bu cihazda desteklenmiyor.')");
+                    return;
+                }
+                if (tts != null) {
+                    tts.stop();
+                }
+                if (speechRecognizer != null) {
+                    speechRecognizer.destroy();
+                }
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(MainActivity.this);
+                speechRecognizer.setRecognitionListener(new RecognitionListener() {
+                    @Override public void onReadyForSpeech(Bundle params) { evalJs("window.onMicState && window.onMicState(true)"); }
+                    @Override public void onBeginningOfSpeech() {}
+                    @Override public void onRmsChanged(float rmsdB) {}
+                    @Override public void onBufferReceived(byte[] buffer) {}
+                    @Override public void onEndOfSpeech() { evalJs("window.onMicState && window.onMicState(false)"); }
+                    @Override public void onError(int error) {
+                        evalJs("window.onMicState && window.onMicState(false)");
+                        evalJs("window.onMicError && window.onMicError('Ses algılanamadı, tekrar deneyin.')");
+                    }
+                    @Override public void onResults(Bundle results) {
+                        evalJs("window.onMicState && window.onMicState(false)");
+                        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                        if (matches != null && !matches.isEmpty()) {
+                            String spoken = matches.get(0).replace("\\", "\\\\").replace("'", "\\'");
+                            evalJs("window.onMicResult && window.onMicResult('" + spoken + "')");
+                        }
+                    }
+                    @Override public void onPartialResults(Bundle partialResults) {}
+                    @Override public void onEvent(int eventType, Bundle params) {}
+                });
+
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+                intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+                speechRecognizer.startListening(intent);
+            }
+        });
+    }
+
     public class PipiBridge {
         @JavascriptInterface
         public void speak(String text) {
             if (ttsReady && tts != null && text != null) {
                 tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pipi_tts");
             }
+        }
+
+        @JavascriptInterface
+        public void startListening() {
+            startNativeListening();
         }
     }
 
@@ -83,6 +165,9 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
 
     @Override
     protected void onDestroy() {
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
         if (tts != null) {
             tts.stop();
             tts.shutdown();
