@@ -144,17 +144,28 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
     public class PipiBridge {
         @JavascriptInterface
         public void speak(String text) {
-            speakWithLang(text, "en-US");
+            speakWithLangRate(text, "en-US", 0.88f);
+        }
+
+        @JavascriptInterface
+        public void speakSlow(String text) {
+            speakWithLangRate(text, "en-US", 0.45f);
         }
 
         @JavascriptInterface
         public void speakWithLang(String text, String langCode) {
+            speakWithLangRate(text, langCode, 0.88f);
+        }
+
+        @JavascriptInterface
+        public void speakWithLangRate(String text, String langCode, float rate) {
             if (ttsReady && tts != null && text != null) {
                 if ("tr-TR".equals(langCode)) {
                     tts.setLanguage(new Locale("tr", "TR"));
                 } else {
                     tts.setLanguage(Locale.US);
                 }
+                tts.setSpeechRate(rate);
                 tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pipi_tts");
             }
         }
