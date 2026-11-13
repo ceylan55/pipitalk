@@ -165,25 +165,25 @@
     /* Animated Pipi Stage inside Lesson */
     .pipi-stage {
       flex: 1; margin-top: 8px; padding: 12px 12px 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-      min-height: 240px; position: relative; border-radius: 24px; overflow: hidden;
+      min-height: 300px; position: relative; border-radius: 24px; overflow: hidden;
     }
     .pipi-flag-bg {
       position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0;
-      border-radius: 24px; overflow: hidden; opacity: 0.88;
-      box-shadow: inset 0 0 24px rgba(0,0,0,0.12);
+      border-radius: 24px; overflow: hidden; opacity: 0.42;
+      box-shadow: inset 0 0 24px rgba(0,0,0,0.08);
     }
     .flag-cloth-sheen {
       position: absolute; top: 0; bottom: 0; left: -100%; width: 300%; z-index: 1; pointer-events: none;
       background: repeating-linear-gradient(
         102deg,
         rgba(255,255,255,0.00) 0%,
-        rgba(255,255,255,0.16) 10%,
-        rgba(0,0,0,0.09) 20%,
+        rgba(255,255,255,0.18) 10%,
+        rgba(0,0,0,0.07) 20%,
         rgba(255,255,255,0.00) 30%
       );
       animation: clothRipple 2.8s linear infinite;
     }
-    .pipi-stage-svg { position: relative; z-index: 2; margin-top: 96px; width: 118px; height: 118px; transition: transform 0.2s; animation: pipiIdle 2.4s ease-in-out infinite; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.28)); }
+    .pipi-stage-svg { position: relative; z-index: 2; margin-top: 56px; width: 230px; height: 230px; transition: transform 0.2s; animation: pipiIdle 2.4s ease-in-out infinite; filter: drop-shadow(0 8px 14px rgba(0,0,0,0.24)); }
     .pipi-stage-msg { position: relative; z-index: 2; }
     @keyframes clothRipple {
       0% { transform: translateX(0%); }
@@ -852,9 +852,9 @@
             <svg viewBox="0 0 360 240" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
               <defs>
                 <linearGradient id="softTrRed" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#F87171"/>
-                  <stop offset="50%" stop-color="#EF4444"/>
-                  <stop offset="100%" stop-color="#DC2626"/>
+                  <stop offset="0%" stop-color="#FCA5A5"/>
+                  <stop offset="50%" stop-color="#F87171"/>
+                  <stop offset="100%" stop-color="#EF4444"/>
                 </linearGradient>
               </defs>
               <rect width="360" height="240" fill="url(#softTrRed)"/>
