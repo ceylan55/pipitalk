@@ -807,9 +807,7 @@
       `;
 
       body.innerHTML = html;
-      if (q.type === 'listen' || q.tag === 'Kelime') {
-        setTimeout(() => speakWord(q.audio), 250);
-      }
+      setTimeout(() => speakWord(q.audio), 250);
     }
 
     function pickOption(el, idx) {
