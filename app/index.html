@@ -1295,7 +1295,61 @@
       qr.innerHTML = chips.map(c => `<div class="quick-chip" onclick="sendQuick('${c.replace(/'/g, "\\'")}')">${c}</div>`).join('');
     }
 
-    function generateAiReply(input) {
+    let aiHistory = [];
+
+    async function askRealAI(userText) {
+      const box = document.getElementById('chatBox');
+      const thinkingDiv = document.createElement('div');
+      thinkingDiv.className = 'msg pipi';
+      thinkingDiv.innerHTML = '<div><strong>Pipi:</strong> 🦜 Düşünüyorum...</div>';
+      box.appendChild(thinkingDiv);
+      box.scrollTop = box.scrollHeight;
+
+      const isTeen = state.ageMode === 'teen13';
+      const ageHint = isTeen
+        ? 'The user is a 13-14 year old student. Use natural, slightly richer English (1-2 sentences) and helpful follow-up questions.'
+        : 'The user is a 7 year old child. Use very simple, warm, short English (1 short sentence).';
+
+      const sysPrompt = `You are Pipi the Parrot ("Papağan Pipi" in Turkish), an intelligent, warm English-learning companion. ${ageHint} Answer the user's actual question or message logically and directly (never just echo/translate their question back as your answer). Reply ONLY with valid JSON: {"en":"your English reply","tr":"natural Turkish translation of your reply (use Papağan Pipi, never tavuk or baykuş)","chips":["2 or 3 short English quick-reply suggestions"]}`;
+
+      aiHistory.push({ role: 'user', content: userText });
+      if (aiHistory.length > 6) aiHistory = aiHistory.slice(-6);
+
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 9000);
+        const res = await fetch('https://text.pollinations.ai/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: ctrl.signal,
+          body: JSON.stringify({
+            model: 'openai',
+            jsonMode: true,
+            messages: [{ role: 'system', content: sysPrompt }].concat(aiHistory)
+          })
+        });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const raw = await res.text();
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.en && parsed.tr) {
+          thinkingDiv.remove();
+          aiHistory.push({ role: 'assistant', content: parsed.en });
+          addAiMessage(parsed.en, parsed.tr);
+          if (Array.isArray(parsed.chips) && parsed.chips.length) {
+            updateQuickChips(parsed.chips.slice(0, 3));
+          }
+          state.xp += 5; saveState();
+          return true;
+        }
+      } catch (e) {}
+      thinkingDiv.remove();
+      return false;
+    }
+
+    async function generateAiReply(input) {
+      const ok = await askRealAI(input);
+      if (ok) return;
       const low = input.trim().toLowerCase();
       let reply = null;
 
