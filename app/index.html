@@ -716,6 +716,21 @@
       } catch (e) {}
     }
 
+    function speakTurkish(text) {
+      try {
+        if (window.PipiBridge && window.PipiBridge.speakWithLang) {
+          window.PipiBridge.speakWithLang(text, 'tr-TR');
+          return;
+        }
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'tr-TR'; u.rate = 0.90; u.pitch = 1.25;
+          window.speechSynthesis.speak(u);
+        }
+      } catch (e) {}
+    }
+
     // --- RENDER ADVENTURE MAP PATH ---
     function renderPath() {
       const container = document.getElementById('unitPath');
@@ -804,6 +819,7 @@
     let builtWords = [];
     let lastCorrect = false;
     let currentExpectedText = "";
+    let questionAudioTimer = null;
 
     function startLesson(unitId) {
       currentUnit = UNITS.find(u => u.id === unitId);
@@ -817,6 +833,7 @@
     }
 
     function closeLesson() {
+      if (questionAudioTimer) { clearTimeout(questionAudioTimer); questionAudioTimer = null; }
       document.getElementById('feedbackSheet').style.display = 'none';
       document.getElementById('lessonModal').style.display = 'none';
     }
@@ -835,10 +852,15 @@
 
       const body = document.getElementById('lessonBody');
       const safeAudio = q.audio.replace(/'/g, "\\'");
+      const cleanPromptText = q.prompt.replace(/["“”]/g, '').replace(/:/g, '').trim();
+      const safePrompt = cleanPromptText.replace(/'/g, "\\'");
       const hideAnswerLabel = (q.type === 'listen' || q.type === 'build' || (q.tag && q.tag.includes('Çeviri')));
       const listenLabel = hideAnswerLabel ? '🔊 Dinle' : `🔊 Dinle: "${q.audio}"`;
       let html = `<span class="exercise-type-tag">${q.tag}</span>`;
-      html += `<div class="exercise-prompt">${q.prompt}</div>`;
+      html += `<div class="exercise-prompt" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <span>${q.prompt}</span>
+        <button class="speak-btn" style="padding:6px 10px;font-size:13px;flex-shrink:0;" onclick="speakTurkish('${safePrompt}')" title="Soruyu Türkçe Dinle">🗣️ Oku</button>
+      </div>`;
       if (!q.hideSpeakRow) {
         html += `<div class="speak-row">
           <button class="speak-btn" onclick="speakWord('${safeAudio}')">${listenLabel}</button>
@@ -913,7 +935,18 @@
       `;
 
       body.innerHTML = html;
-      if (q.autoSpeak !== false) {
+      if (questionAudioTimer) { clearTimeout(questionAudioTimer); questionAudioTimer = null; }
+      if (state.ageMode === 'kids7') {
+        if (q.type === 'listen') {
+          setTimeout(() => speakTurkish('Sesi dinle ve doğru anlamı seç'), 200);
+          questionAudioTimer = setTimeout(() => speakWord(q.audio), 2200);
+        } else if (q.tag === 'Kelime') {
+          setTimeout(() => speakWord(q.audio), 220);
+          questionAudioTimer = setTimeout(() => speakTurkish('ne anlama gelir?'), 1400);
+        } else {
+          setTimeout(() => speakTurkish(cleanPromptText), 220);
+        }
+      } else if (q.autoSpeak !== false) {
         setTimeout(() => speakWord(q.audio), 250);
       }
     }
@@ -927,6 +960,8 @@
       const opt = q && q.options ? q.options[idx] : null;
       if (opt && opt.say) {
         speakWord(opt.say);
+      } else if (state.ageMode === 'kids7' && opt && opt.text) {
+        speakTurkish(opt.text);
       }
     }
 
