@@ -1275,18 +1275,17 @@
     function isGibberish(str) {
       const clean = str.trim().toLowerCase();
       if (clean.length < 2) return true;
-      if (/^[0-9\W_]+$/.test(clean)) return true; // Sadece sayı veya sembol
-      if (/(.)\1{2,}/.test(clean)) return true; // Aynı harf 3+ kez tekrar (aaa, zzz)
+      if (/^[\W_]+$/.test(clean)) return true; // Sadece sembol
+      if (/(.)\1{3,}/.test(clean)) return true; // Aynı harf 4+ kez tekrar (aaaa, zzzz)
       const words = clean.split(/\s+/).filter(Boolean);
-      const validShort = new Set(["hi", "ok", "no", "go", "me", "my", "is", "am", "do", "to", "in", "on"]);
-      // Sesli harf içermeyen uzun kelimeler veya rastgele klavye vuruşları
-      for (const w of words) {
-        const letters = w.replace(/[^a-zçğıöşü]/g, '');
-        if (letters.length === 0) return true;
-        if (letters.length <= 2 && !validShort.has(letters)) return true;
-        if (letters.length >= 3 && !/[aeiouyöüıi]/.test(letters)) return true;
-        if (/[bcdfghjklmnpqrstvwxz]{5,}/.test(letters)) return true;
-      }
+      if (words.length >= 2) return false; // Çok kelimeli cümleleri anlamsız sayma
+      if (/^[0-9]+$/.test(clean)) return false; // Tek sayı da geçerli
+      const letters = clean.replace(/[^a-zçğıöşü]/g, '');
+      if (letters.length === 0) return true;
+      const validShort = new Set(["hi", "ok", "no", "go", "me", "my", "is", "am", "do", "to", "in", "on", "a", "i", "we", "he", "it", "up", "at", "by", "or", "so"]);
+      if (letters.length <= 2 && !validShort.has(letters)) return true;
+      if (letters.length >= 3 && !/[aeiouyöüıi]/.test(letters)) return true;
+      if (/[bcdfghjklmnpqrstvwxz]{5,}/.test(letters)) return true;
       return false;
     }
 
@@ -1317,7 +1316,7 @@
 
       try {
         const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 9000);
+        const timer = setTimeout(() => ctrl.abort(), 22000);
         const res = await fetch('https://text.pollinations.ai/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1331,7 +1330,8 @@
         clearTimeout(timer);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const raw = await res.text();
-        const parsed = JSON.parse(raw);
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
         if (parsed && parsed.en && parsed.tr) {
           thinkingDiv.remove();
           aiHistory.push({ role: 'assistant', content: parsed.en });
@@ -1356,10 +1356,33 @@
       // 1. Anlamsız / rastgele girdi kontrolü
       if (isGibberish(low)) {
         reply = pickRandom([
-          { en: "Hoot? I didn't understand that. Can you try an English word like 'Hello' or 'Red'?", tr: "Hu? Bunu anlayamadım. 'Hello' veya 'Red' gibi bir İngilizce kelime dener misin?", chips: ["Hello Pipi!", "I like red", "How are you?"] },
-          { en: "Oops! That looks a little confusing. Let's say 'My name is ...' together!", tr: "Eyvah, bu biraz karışık görünüyor. Hadi birlikte 'My name is ...' diyelim!", chips: ["My name is Ali", "I am happy", "Goodbye"] },
-          { en: "Hmm, I'm still learning! Could you write a short English sentence?", tr: "Hımm, bunu çözemedim! Kısa bir İngilizce cümle yazabilir misin?", chips: ["I like cats", "Good morning", "Thank you"] }
+          { en: "Squawk? I didn't understand that. Can you try an English word like 'Hello' or 'Red'?", tr: "Gak? Bunu anlayamadım. 'Hello' veya 'Red' gibi bir İngilizce kelime dener misin?", chips: ["Hello Pipi!", "I like red", "How are you?"] },
+          { en: "Oops! That looks a little confusing. Let's say 'My name is ...' together!", tr: "Eyvah, bu biraz karışık görünüyor. Hadi birlikte 'My name is ...' diyelim!", chips: ["My name is Ali", "I am happy", "Goodbye"] }
         ]);
+      }
+      // 1.5. Akıllı Mantık & Matematik Çözücü (internet yavaşsa bile mantıklı cevap!)
+      else if (/\b(finger|fingers|parmak)\b/.test(low) && /\d+/.test(low)) {
+        const num = parseInt(low.match(/\d+/)[0], 10);
+        const hasMe = /\b(with me|benimle|yanımda|plus you|include)\b/.test(low);
+        const people = hasMe ? (num + 1) : num;
+        const total = people * 10;
+        const noteEn = hasMe ? `${num} people plus you makes ${people} people (${people} × 10 = ${total}).` : `${people} × 10 = ${total}.`;
+        const noteTr = hasMe ? `Seninle birlikte ${people} kişi eder (${people} × 10 = ${total}).` : `${people} × 10 = ${total}.`;
+        reply = {
+          en: `Each person has 10 fingers on their hands, so there are ${total} fingers in total! (${noteEn})`,
+          tr: `Her insanın ellerinde 10 parmak vardır, yani toplam ${total} el parmağı olur! (${noteTr})`,
+          chips: ["That's smart!", "Ask me another", "Thank you"]
+        };
+      }
+      else if (/^\s*(\d+)\s*([\+\-\*x×\/])\s*(\d+)/.test(low)) {
+        const m = low.match(/(\d+)\s*([\+\-\*x×\/])\s*(\d+)/);
+        const a = parseFloat(m[1]), op = m[2], b = parseFloat(m[3]);
+        const ans = op === '+' ? a + b : op === '-' ? a - b : (op === '/' ? (b !== 0 ? +(a / b).toFixed(2) : 0) : a * b);
+        reply = {
+          en: `${a} ${op} ${b} equals ${ans}! Math in English is fun!`,
+          tr: `${a} ${op} ${b} = ${ans} eder! İngilizce matematik çok eğlenceli!`,
+          chips: ["Great!", "5 + 7", "Thank you"]
+        };
       }
       // 2. Türkçe kelime yakalama (öğretici düzeltme)
       else if (/\b(merhaba|selam|günaydın|nasılsın|kedi|köpek|mavi|kırmızı|yeşil|sarı|elma|teşekkür)\b/.test(low)) {
