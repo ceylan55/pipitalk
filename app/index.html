@@ -1188,9 +1188,7 @@
         const el = document.getElementById(msgId);
         if (enTrans) {
           if (el) el.innerText = '🇬🇧 ' + enTrans;
-          addAiMessage(`In English: "${enTrans}"`, `Türkçesi: "${clean}" (+5 XP!)`);
-          state.xp += 5; saveState();
-          speakWord(enTrans);
+          generateAiReply(enTrans);
           return;
         } else {
           if (el) el.innerText = '';
@@ -1328,6 +1326,16 @@
           { en: "Hi there! How are you feeling today?", tr: "Selam! Bugün kendini nasıl hissediyorsun?", chips: ["I am happy!", "I am great!", "I am tired"] },
           { en: "Hoot hoot! Nice to see you! Do you like animals?", tr: "Hu hu! Seni gördüğüme sevindim! Hayvanları sever misin?", chips: ["I like cats", "I like owls", "Yes, I do!"] }
         ]);
+      }
+      // 3.5. Pipi'yi tanıma ("Sen kimsin?", "Adın ne?", "Kaç yaşındasın?")
+      else if (/\b(who are you|what is your name|what's your name|sen kimsin|adın ne|kimsin)\b/.test(low)) {
+        reply = pickRandom([
+          { en: "I am Pipi the Parrot, your cheerful English friend! What is your name?", tr: "Ben Papağan Pipi, senin neşeli İngilizce arkadaşınım! Senin adın ne?", chips: ["My name is Ali", "How are you?", "What do you like?"] },
+          { en: "My name is Pipi! I am a colorful parrot who helps you learn English.", tr: "Benim adım Pipi! İngilizce öğrenmene yardım eden renkli bir papağanım.", chips: ["Nice to meet you!", "I like birds", "How old are you?"] }
+        ]);
+      }
+      else if (/\b(how old are you|kaç yaşındasın)\b/.test(low)) {
+        reply = { en: "I am a young parrot, always ready to play and learn! How old are you?", tr: "Ben oynamaya ve öğrenmeye her zaman hazır genç bir papağanım! Sen kaç yaşındasın?", chips: ["I am 7 years old", "I am 13 years old", "Nice!"] };
       }
       // 4. Hal hatır
       else if (low.includes("how are you")) {
