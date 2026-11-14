@@ -591,21 +591,21 @@
         const mode = isTeen ? (i % 2 === 0 ? 2 : 1) : Math.floor(Math.random() * 3);
         if (mode === 0) {
           qs.push({
-            type: "choice", tag: "Kelime", audio: target.en,
+            type: "choice", tag: "Kelime", audio: target.en, autoSpeak: true,
             prompt: `"${target.en}" ne anlama gelir?`,
             options: shuffleArr([{ text: target.tr, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.tr, emoji: d.em, correct: false }))))
           });
         } else if (mode === 1) {
           qs.push({
-            type: "listen", tag: isTeen ? "Zor Dinleme" : "Dinleme", audio: target.en,
+            type: "listen", tag: isTeen ? "Zor Dinleme" : "Dinleme", audio: target.en, autoSpeak: true,
             prompt: "Sesi dinle ve doğru anlamı seç:",
             options: shuffleArr([{ text: target.tr, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.tr, emoji: d.em, correct: false }))))
           });
         } else {
           qs.push({
-            type: "choice", tag: isTeen ? "İleri Çeviri" : "Çeviri", audio: target.en,
+            type: "choice", tag: isTeen ? "İleri Çeviri" : "Çeviri", audio: target.en, autoSpeak: false, hideSpeakRow: true,
             prompt: `"${target.tr}" kelimesinin İngilizcesi hangisi?`,
-            options: shuffleArr([{ text: target.en, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.en, emoji: d.em, correct: false }))))
+            options: shuffleArr([{ text: target.en, say: target.en, emoji: target.em, correct: true }].concat(distractors.map(d => ({ text: d.en, say: d.en, emoji: d.em, correct: false }))))
           });
         }
       }
@@ -619,7 +619,7 @@
           words = baseWords.concat(decoys);
         }
         qs.push({
-          type: "build", tag: isTeen ? "Zorlu Cümle Kur" : "Cümle Kur", audio: s.en,
+          type: "build", tag: isTeen ? "Zorlu Cümle Kur" : "Cümle Kur", audio: s.en, autoSpeak: false,
           prompt: isTeen ? `"${s.tr}" cümlesini kur (fazla kelimelere dikkat!):` : `"${s.tr}" cümlesini kur:`,
           words: shuffleArr(words),
           answer: s.en
@@ -839,10 +839,12 @@
       const listenLabel = hideAnswerLabel ? '🔊 Dinle' : `🔊 Dinle: "${q.audio}"`;
       let html = `<span class="exercise-type-tag">${q.tag}</span>`;
       html += `<div class="exercise-prompt">${q.prompt}</div>`;
-      html += `<div class="speak-row">
-        <button class="speak-btn" onclick="speakWord('${safeAudio}')">${listenLabel}</button>
-        <button class="speak-btn slow" onclick="speakSlow('${safeAudio}')">🐢 Yavaş Dinle</button>
-      </div>`;
+      if (!q.hideSpeakRow) {
+        html += `<div class="speak-row">
+          <button class="speak-btn" onclick="speakWord('${safeAudio}')">${listenLabel}</button>
+          <button class="speak-btn slow" onclick="speakSlow('${safeAudio}')">🐢 Yavaş Dinle</button>
+        </div>`;
+      }
 
       if (q.type === 'choice' || q.type === 'listen') {
         html += `<div class="word-cards">`;
@@ -911,7 +913,9 @@
       `;
 
       body.innerHTML = html;
-      setTimeout(() => speakWord(q.audio), 250);
+      if (q.autoSpeak !== false) {
+        setTimeout(() => speakWord(q.audio), 250);
+      }
     }
 
     function pickOption(el, idx) {
@@ -919,6 +923,11 @@
       el.classList.add('selected');
       selectedOption = idx;
       document.getElementById('checkBtn').disabled = false;
+      const q = currentQuestions[currentQIndex];
+      const opt = q && q.options ? q.options[idx] : null;
+      if (opt && opt.say) {
+        speakWord(opt.say);
+      }
     }
 
     function addWord(el, word) {
